@@ -136,7 +136,9 @@ function Dashboard({
 	};
 
 	const initVehicleLaunch = () => {
-		if (
+
+		
+		if(
 			vehicleStatus === "Armed" &&
 			InitialHeight !== "N/A" &&
 			InitialGPS !== "N/A"
@@ -192,6 +194,9 @@ function Dashboard({
 			data.GPSCords.longitude.toFixed(6),
 		];
 		setInitialGPSdisplay(positionShort.join(""));
+
+		setInitialHeight(data.GPSHeight);
+	
 	};
 
 	const HandleEndFlight = () => {
@@ -232,6 +237,13 @@ function Dashboard({
 						<h2>Pressure height</h2>
 						<p>{PressureHeight} m</p>
 					</div>
+					<div>
+						
+							<h2>Initial height</h2>
+							<p>{InitialHeight} m</p>
+				
+					</div>
+
 				</div>
 				<div className="heights">
 					<div>
@@ -239,40 +251,7 @@ function Dashboard({
 						<p>{positionFromLaunchpad} m</p>
 					</div>
 				</div>
-				<div className="heights init">
-					<div>
-						<span>
-							<h2>Initial height</h2>
-							<p>{InitialHeight} m</p>
-						</span>
-						<button
-							title="Set initial height"
-							disabled={
-								vehicleStatus === "Armed" ||
-								vehicleStatus === "Launched"
-							}
-							onClick={() => {
-								setInitialHeight(GPSHeight);
-							}}>
-							<img src={settingsIcon} alt="Settings" />
-						</button>
-					</div>
-					<div>
-						<span>
-							<h2>Initial GPS cords</h2>
-							<p>{initialGPSdisplay}</p>
-						</span>
-						<button
-							title="Set initial GPS coordinates"
-							disabled={
-								vehicleStatus === "Armed" ||
-								vehicleStatus === "Launched"
-							}
-							onClick={handleInitGPS}>
-							<img src={settingsIcon} alt="Settings" />
-						</button>
-					</div>
-				</div>
+				
 			</section>
 			<section className="main-four">
 				<div className="vodoravno">
@@ -304,40 +283,50 @@ function Dashboard({
 						<p>{beeperStatus}</p>
 					</div>
 					<div
-						onClick={HandleEndFlight}
-						style={{
-							opacity: vehicleStatus === "Launched" ? 1 : 0.2,
-						}}>
-						<h2
-							disabled={
-								vehicleStatus === "Launched" ? false : true
-							}
-							style={{
-								cursor:
-									vehicleStatus === "Launched"
-										? "pointer"
-										: "not-allowed",
-							}}>
-							End flight
-						</h2>
-					</div>
+    onClick={vehicleStatus === "Launched" ? HandleEndFlight : null}
+    style={{
+        opacity: vehicleStatus === "Launched" ? 1 : 0.2,
+        cursor: vehicleStatus === "Launched" ? "pointer" : "not-allowed",
+        pointerEvents: vehicleStatus === "Launched" ? 'auto' : 'none', // Disable click interactions
+    }}
+>
+    <h2>
+        End flight
+    </h2>
+</div>
+
+
+
 					<div
-						onClick={openPreFlightCheck}
-						style={{
-							opacity: vehicleStatus === "Ready" ? 1 : 0.2,
-						}}>
-						<h2
-							disabled={vehicleStatus === "Ready" ? false : true}
-							style={{
-								cursor:
-									vehicleStatus === "Ready"
-										? "pointer"
-										: "not-allowed",
-							}}>
-							Open pre-flight checklist
-						</h2>
-					</div>
+    onClick={vehicleStatus === "Ready" ? openPreFlightCheck : undefined}
+    style={{
+        opacity: vehicleStatus === "Ready" ? 1 : 0.2,
+        pointerEvents: vehicleStatus === "Ready" ? 'auto' : 'none', // Disable click events when not ready
+    }}
+>
+    <h2
+        style={{
+            cursor: vehicleStatus === "Ready" ? "pointer" : "not-allowed", // Change cursor based on readiness
+        }}
+    >
+        Open pre-flight checklist
+    </h2>
+</div>
+
+					<div
+    onClick={vehicleStatus === "Ready" ? handleInitGPS : null}
+    style={{
+        opacity: vehicleStatus === "Ready" ? 1 : 0.2,
+        pointerEvents: vehicleStatus === "Ready" ? 'auto' : 'none', // Prevent clicks when disabled
+    }}
+>
+    <h2>
+        Set HOMEPOINT
+    </h2>
+</div>
+
 				</div>
+				
 				<div className="vodoravno">
 					<div
 						className="launch"
@@ -366,6 +355,7 @@ function Dashboard({
 							opacity: vehicleStatus === "Armed" ? 1 : 0.2,
 						}}>
 						<button
+						id="launch_button"
 							disabled={vehicleStatus === "Armed" ? false : true}
 							style={{
 								cursor:

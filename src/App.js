@@ -32,6 +32,19 @@ function App() {
 	const [timeUnit, setTimeUnit] = useState("s");
 
 	useEffect(() => {
+		const handleEscape = (event) => {
+			if (event.key === "Escape") {
+				document.getElementById("pre-flight").style.display = "none";
+			}
+		};
+
+		document.addEventListener("keydown", handleEscape);
+		return () => {
+			document.removeEventListener("keydown", handleEscape);
+		};
+	}, []);
+
+	useEffect(() => {
 		if (flightNumber.length > 10) {
 			setFlightNumber(flightNumber.slice(0, 10));
 		}
@@ -66,12 +79,17 @@ function App() {
 
 	const handleKeyPress = (event) => {
 		if (event.key === "Enter") {
-			setFlightNumber(inputFlightNumber);
-			document.getElementById("overlay").style.display = "none";
-
+			if (inputFlightNumber.length !== 0) {
+				setFlightNumber(inputFlightNumber);
+				document.getElementById("overlay").style.display = "none";
+			} else {
+				document.getElementById("box").classList.add("turbulence");
+				setTimeout(() => {
+					document.getElementById("box").classList.remove("turbulence");
+				}, 300);
+			}
 		}
-	};
-
+	}
 	const handleInputChange = (event) => {
 		setInputFlightNumber(event.target.value);
 		if (inputRef.current) {
@@ -119,10 +137,10 @@ function App() {
 
 	return (
 		<div>
-			<div className="pre-flight">
+			<div className="pre-flight" id="pre-flight">
 				<div className="pre-box">
 					<div className="pre-title">
-						<h2 id="errorDisplay">Besedilo o napaki</h2>
+						<h2 id="errorDisplay"></h2>
 						
 						<button
 							onClick={() => {
@@ -173,7 +191,7 @@ function App() {
 			</div>
 
 			<div className="overlay" id="overlay">
-				<div className="box">
+				<div className="box" id="box">
 					<div className="div_organize">
 						<input
 							ref={inputRef}
