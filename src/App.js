@@ -7,7 +7,11 @@ import Settings from "./components/settings/settings";
 
 import dashboardIcon from "./icons/dashboard.svg";
 import settingsIcon from "./icons/settings.svg";
+import closeIcon from "./icons/close.svg";
 import analysisIcon from "./icons/analysis.svg";
+import erroricon from "./icons/error.svg";
+import tickicon from "./icons/tick.svg";
+import warningicon from "./icons/warning.svg";
 
 import GetData from "./components/tools/Simulator.mjs";
 
@@ -63,7 +67,8 @@ function App() {
 	const handleKeyPress = (event) => {
 		if (event.key === "Enter") {
 			setFlightNumber(inputFlightNumber);
-			document.querySelector(".overlay").style.display = "none";
+			document.getElementById("overlay").style.display = "none";
+
 		}
 	};
 
@@ -114,7 +119,60 @@ function App() {
 
 	return (
 		<div>
-			<div className="overlay">
+			<div className="pre-flight">
+				<div className="pre-box">
+					<div className="pre-title">
+						<h2 id="errorDisplay">Besedilo o napaki</h2>
+						
+						<button
+							onClick={() => {
+								document.querySelector(
+									".pre-flight"
+								).style.display = "none";
+							}}>
+							<img src={closeIcon} alt="Close" />
+						</button>
+					</div>
+					<hr className="pre-nav-hr"></hr>
+					<div className="pre-body">
+					<ul>
+						<li>
+							<h3>GPS module</h3>
+							<img
+								src={erroricon}
+							/>
+						</li>
+						<hr></hr>
+						<li>
+							<h3>BMP 280</h3>
+							<img
+							onMouseEnter={() => {
+								document.getElementById("errorDisplay").innerHTML = "Besedilo o napakDDDi";
+							}
+							}
+							onMouseLeave={() => {
+								document.getElementById("errorDisplay").innerHTML = ""
+							}
+							}
+								src={warningicon}
+							/>
+						</li>
+						<hr></hr>
+						<li>
+							<h3>Lora module</h3>
+							<img
+								src={tickicon}
+							/>
+						</li>
+						<hr></hr>
+						
+					</ul>
+					</div>
+				</div>
+				
+			</div>
+
+			<div className="overlay" id="overlay">
 				<div className="box">
 					<div className="div_organize">
 						<input

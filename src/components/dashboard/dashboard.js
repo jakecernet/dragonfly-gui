@@ -213,57 +213,7 @@ function Dashboard({
 					<h2>{countdownNumber}</h2>
 				</div>
 			</div>
-			<div className="pre-flight">
-				<div>
-					<div className="pre-title">
-						<h2>{errMesg}</h2>
-						<button
-							onClick={() => {
-								document.querySelector(
-									".pre-flight"
-								).style.display = "none";
-							}}>
-							X
-						</button>
-					</div>
-					<hr></hr>
-					<ul>
-						<li>
-							<h3>GPS module</h3>
-							<img
-								src={connectedIcon}
-								alt="Connected"
-								title={gpsMsg}
-								onClick={() => {
-									setErrMesg(gpsMsg);
-								}}
-							/>
-						</li>
-						<hr></hr>
-						<li>
-							<h3>Barometer module</h3>
-							<img src={errorIcon} alt="Error" title={barMsg}
-								onClick={() => {
-									setErrMesg(barMsg);
-								}}
-							/>
-						</li>
-						<hr></hr>
-						<li>
-							<h3>LORA module</h3>
-							<img
-								src={connectedIcon}
-								alt="Connected"
-								title={loraMsg}
-								onClick={() => {
-									setErrMesg(loraMsg);
-								}}
-							/>
-						</li>
-						<hr></hr>
-					</ul>
-				</div>
-			</div>
+			
 			<section className="text">
 				<div className="heights">
 					<div>
@@ -426,30 +376,6 @@ function Dashboard({
 							Launch
 						</button>
 					</div>
-				</div>
-				<div className="pre-flight">
-					<ul>
-						<li>
-							<p>GPS module</p>
-							<img
-								src={connectedIcon}
-								alt="Connected"
-								title={gpsMsg}
-							/>
-						</li>
-						<li>
-							<p>Barometer</p>
-							<img src={errorIcon} alt="Error" title={barMsg} />
-						</li>
-						<li>
-							<p>LORA</p>
-							<img
-								src={connectedIcon}
-								alt="Connected"
-								title={loraMsg}
-							/>
-						</li>
-					</ul>
 				</div>
 			</section>
 			<section>
