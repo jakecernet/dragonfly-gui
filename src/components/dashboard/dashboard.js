@@ -80,6 +80,8 @@ function Dashboard({
 	const [barMsg, setBarMsg] = useState("Barometer module not detected");
 	const [loraMsg, setloraMsg] = useState("LORA module detected");
 
+	const [errMesg, setErrMesg] = useState("Pre-flight checklist");
+
 	useEffect(() => {
 		const output = haversineDistance(
 			InitialGPS.split(",")[0],
@@ -199,12 +201,67 @@ function Dashboard({
 		window.location.reload();
 	};
 
+	const openPreFlightCheck = () => {
+		document.querySelector(".pre-flight").style.display = "flex";
+	};
+
 	return (
 		<div className="dashboard">
 			<div className="countdown">
 				<div id="fader">
 					<p>Vehicle launch in</p>
 					<h2>{countdownNumber}</h2>
+				</div>
+			</div>
+			<div className="pre-flight">
+				<div>
+					<div className="pre-title">
+						<h2>{errMesg}</h2>
+						<button
+							onClick={() => {
+								document.querySelector(
+									".pre-flight"
+								).style.display = "none";
+							}}>
+							X
+						</button>
+					</div>
+					<hr></hr>
+					<ul>
+						<li>
+							<h3>GPS module</h3>
+							<img
+								src={connectedIcon}
+								alt="Connected"
+								title={gpsMsg}
+								onClick={() => {
+									setErrMesg(gpsMsg);
+								}}
+							/>
+						</li>
+						<hr></hr>
+						<li>
+							<h3>Barometer module</h3>
+							<img src={errorIcon} alt="Error" title={barMsg}
+								onClick={() => {
+									setErrMesg(barMsg);
+								}}
+							/>
+						</li>
+						<hr></hr>
+						<li>
+							<h3>LORA module</h3>
+							<img
+								src={connectedIcon}
+								alt="Connected"
+								title={loraMsg}
+								onClick={() => {
+									setErrMesg(loraMsg);
+								}}
+							/>
+						</li>
+						<hr></hr>
+					</ul>
 				</div>
 			</div>
 			<section className="text">
@@ -310,6 +367,22 @@ function Dashboard({
 							End flight
 						</h2>
 					</div>
+					<div
+						onClick={openPreFlightCheck}
+						style={{
+							opacity: vehicleStatus === "Ready" ? 1 : 0.2,
+						}}>
+						<h2
+							disabled={vehicleStatus === "Ready" ? false : true}
+							style={{
+								cursor:
+									vehicleStatus === "Ready"
+										? "pointer"
+										: "not-allowed",
+							}}>
+							Open pre-flight checklist
+						</h2>
+					</div>
 				</div>
 				<div className="vodoravno">
 					<div
@@ -353,30 +426,6 @@ function Dashboard({
 							Launch
 						</button>
 					</div>
-				</div>
-				<div className="pre-flight">
-					<ul>
-						<li>
-							<p>GPS module</p>
-							<img
-								src={connectedIcon}
-								alt="Connected"
-								title={gpsMsg}
-							/>
-						</li>
-						<li>
-							<p>Barometer</p>
-							<img src={errorIcon} alt="Error" title={barMsg} />
-						</li>
-						<li>
-							<p>LORA</p>
-							<img
-								src={connectedIcon}
-								alt="Connected"
-								title={loraMsg}
-							/>
-						</li>
-					</ul>
 				</div>
 			</section>
 			<section>

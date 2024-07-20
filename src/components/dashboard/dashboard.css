@@ -62,6 +62,87 @@
     }
 }
 
+.pre-flight {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    background: #000000ad;
+    border-radius: 10px;
+    padding: 20px;
+    position: fixed;
+    z-index: 1000;
+
+    div {
+        width: 60%;
+        height: 80%;
+        border: 2px solid #fff;
+        background: #000000cc;
+        backdrop-filter: blur(10px);
+
+        h2 {
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 200;
+            margin: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 20px;
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 150;
+            width: 80%;
+            margin: auto;
+
+            li {
+                margin-top: 30px;
+                margin-bottom: 5px;
+                display: flex;
+                justify-content: space-between;
+
+                h3 {
+                    font-weight: 200;
+                }
+
+                img {
+                    width: 30px;
+                    height: 30px;
+                }
+            }
+        }
+    }
+
+    .pre-title {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        height: 60px;
+        align-items: center;
+        padding: 0 20px;
+        border: none;
+
+        button {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 200;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            cursor: pointer;
+            color: #8d8d8d;
+        }
+    }
+}
+
+/* Controls */
+
 .text {
     display: flex;
     flex-direction: column;
@@ -182,11 +263,13 @@
 .toolbar {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    flex-wrap: wrap;
     width: 90%;
     margin: auto;
     padding: 10px;
+    gap: 20px;
 }
 
 .toolbar div {
@@ -224,37 +307,6 @@
     font-weight: 450;
     width: 120px;
     height: 120px;
-}
-
-.pre-flight {
-    width: 90%;
-
-    ul {
-        list-style: none;
-        display: flex;
-        flex-direction: column;
-
-        li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 15px;
-            border-radius: 10px;
-            background: #1b1b1b5b;
-            margin: 10px 0;
-
-            p {
-                font-size: 1.2rem;
-                font-weight: 200;
-                color: #fff;
-            }
-
-            img {
-                width: 30px;
-                height: 30px;
-            }
-        }
-    }
 }
 
 .leaflet-top {
