@@ -8,7 +8,9 @@ import "react-circular-progressbar/dist/styles.css";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-import locationMarker from "../../icons/location_marker.png";
+import locationMarker from "../../icons/rocket.png";
+import homeMarker from "../../icons/home.png";
+
 import settingsIcon from "../../icons/settings.svg";
 
 import connectedIcon from "../../icons/connected.svg";
@@ -17,11 +19,18 @@ import errorIcon from "../../icons/error.svg";
 import useWebSocket from "../tools/useWebSocket";
 import { haversineDistance } from "../tools/AdditionalFunctions";
 
-const icon = new L.Icon({
+const RocketIcon = new L.Icon({
 	iconUrl: locationMarker,
-	iconSize: [50, 50],
+	iconSize: [25, 25],
 	iconAnchor: [25, 50],
 });
+
+const HomeIcon = new L.Icon({
+	iconUrl: homeMarker,
+	iconSize: [25, 25],
+	iconAnchor: [25, 50],
+});
+
 
 const circleDisplay = ({ value, unit, maxRange, color }) => {
 	return (
@@ -76,11 +85,6 @@ function Dashboard({
 
 	const [positionFromLaunchpad, setPositionFromLaunchpad] = useState("N/A");
 
-	const [gpsMsg, setGpsMsg] = useState("GPS module detected");
-	const [barMsg, setBarMsg] = useState("Barometer module not detected");
-	const [loraMsg, setloraMsg] = useState("LORA module detected");
-
-	const [errMesg, setErrMesg] = useState("Pre-flight checklist");
 
 	useEffect(() => {
 		const output = haversineDistance(
@@ -393,7 +397,11 @@ function Dashboard({
 							marginTop: "10px",
 						}}>
 						<TileLayer url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}" />
-						<Marker position={position} icon={icon}></Marker>
+						<Marker position={position} icon={RocketIcon}></Marker>
+						<Marker
+							position={InitialGPS === "N/A" ? [0, 0] : [parseFloat(InitialGPS.split(",")[0]), parseFloat(InitialGPS.split(",")[1])]}
+							icon={HomeIcon}
+						></Marker>
 						<ChangeView center={position} />
 					</MapContainer>
 				</div>
