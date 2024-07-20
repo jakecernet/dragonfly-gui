@@ -10,24 +10,25 @@ import L from "leaflet";
 
 import locationMarker from "../../icons/rocket.png";
 import homeMarker from "../../icons/home.png";
-
 import settingsIcon from "../../icons/settings.svg";
-
 import connectedIcon from "../../icons/connected.svg";
 import errorIcon from "../../icons/error.svg";
+import saveIcon from "../../icons/save.svg";
+import checkIcon from "../../icons/check.svg";
+import homepointIcon from "../../icons/home.svg";
 
 import useWebSocket from "../tools/useWebSocket";
 import { haversineDistance } from "../tools/AdditionalFunctions";
 
 const RocketIcon = new L.Icon({
 	iconUrl: locationMarker,
-	iconSize: [25, 25],
+	iconSize: [35, 35],
 	iconAnchor: [25, 50],
 });
 
 const HomeIcon = new L.Icon({
 	iconUrl: homeMarker,
-	iconSize: [25, 25],
+	iconSize: [35, 35],
 	iconAnchor: [25, 50],
 });
 
@@ -137,8 +138,8 @@ function Dashboard({
 
 	const initVehicleLaunch = () => {
 
-		
-		if(
+
+		if (
 			vehicleStatus === "Armed" &&
 			InitialHeight !== "N/A" &&
 			InitialGPS !== "N/A"
@@ -196,7 +197,7 @@ function Dashboard({
 		setInitialGPSdisplay(positionShort.join(""));
 
 		setInitialHeight(data.GPSHeight);
-	
+
 	};
 
 	const HandleEndFlight = () => {
@@ -222,7 +223,7 @@ function Dashboard({
 					<h2>{countdownNumber}</h2>
 				</div>
 			</div>
-			
+
 			<section className="text">
 				<div className="heights">
 					<div>
@@ -238,10 +239,10 @@ function Dashboard({
 						<p>{PressureHeight} m</p>
 					</div>
 					<div>
-						
-							<h2>Initial height</h2>
-							<p>{InitialHeight} m</p>
-				
+
+						<h2>Initial height</h2>
+						<p>{InitialHeight} m</p>
+
 					</div>
 
 				</div>
@@ -251,7 +252,7 @@ function Dashboard({
 						<p>{positionFromLaunchpad} m</p>
 					</div>
 				</div>
-				
+
 			</section>
 			<section className="main-four">
 				<div className="vodoravno">
@@ -282,51 +283,59 @@ function Dashboard({
 						<h2>Beeper</h2>
 						<p>{beeperStatus}</p>
 					</div>
-					<div
-    onClick={vehicleStatus === "Launched" ? HandleEndFlight : null}
-    style={{
-        opacity: vehicleStatus === "Launched" ? 1 : 0.2,
-        cursor: vehicleStatus === "Launched" ? "pointer" : "not-allowed",
-        pointerEvents: vehicleStatus === "Launched" ? 'auto' : 'none', // Disable click interactions
-    }}
->
-    <h2>
-        End flight
-    </h2>
-</div>
-
-
+					
+					<selection className="vodoravno2">
 
 					<div
-    onClick={vehicleStatus === "Ready" ? openPreFlightCheck : undefined}
-    style={{
-        opacity: vehicleStatus === "Ready" ? 1 : 0.2,
-        pointerEvents: vehicleStatus === "Ready" ? 'auto' : 'none', // Disable click events when not ready
-    }}
->
-    <h2
-        style={{
-            cursor: vehicleStatus === "Ready" ? "pointer" : "not-allowed", // Change cursor based on readiness
-        }}
-    >
-        Open pre-flight checklist
-    </h2>
-</div>
+						onClick={vehicleStatus === "Launched" ? HandleEndFlight : null}
+						style={{
+							opacity: vehicleStatus === "Launched" ? 1 : 0.2,
+							cursor: vehicleStatus === "Launched" ? "pointer" : "not-allowed",
+							pointerEvents: vehicleStatus === "Launched" ? 'auto' : 'none', // Disable click interactions
+						}}
+					>
+						<h2>
+							<img src={saveIcon} alt="End flight" />
+			
+						</h2>
+					</div>
+
+
 
 					<div
-    onClick={vehicleStatus === "Ready" ? handleInitGPS : null}
-    style={{
-        opacity: vehicleStatus === "Ready" ? 1 : 0.2,
-        pointerEvents: vehicleStatus === "Ready" ? 'auto' : 'none', // Prevent clicks when disabled
-    }}
->
-    <h2>
-        Set HOMEPOINT
-    </h2>
-</div>
+						onClick={vehicleStatus === "Ready" ? openPreFlightCheck : undefined}
+						style={{
+							opacity: vehicleStatus === "Ready" ? 1 : 0.2,
+							pointerEvents: vehicleStatus === "Ready" ? 'auto' : 'none', // Disable click events when not ready
+						}}
+					>
+						<h2
+							style={{
+								cursor: vehicleStatus === "Ready" ? "pointer" : "not-allowed", // Change cursor based on readiness
+							}}
+						>
+							
+							<img src={checkIcon} alt="Open pre-flight checklist" />
+			
+							
+						</h2>
+					</div>
 
+					<div
+						onClick={vehicleStatus === "Ready" ? handleInitGPS : null}
+						style={{
+							opacity: vehicleStatus === "Ready" ? 1 : 0.2,
+							pointerEvents: vehicleStatus === "Ready" ? 'auto' : 'none', // Prevent clicks when disabled
+						}}
+					>
+						<h2>
+							<img src={homepointIcon} alt="Set homepoint" />
+						</h2>
+					</div>
+
+				</selection>
 				</div>
-				
+
 				<div className="vodoravno">
 					<div
 						className="launch"
@@ -355,7 +364,7 @@ function Dashboard({
 							opacity: vehicleStatus === "Armed" ? 1 : 0.2,
 						}}>
 						<button
-						id="launch_button"
+							id="launch_button"
 							disabled={vehicleStatus === "Armed" ? false : true}
 							style={{
 								cursor:

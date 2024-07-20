@@ -155,6 +155,15 @@
     width: 100%;
 }
 
+.vodoravno2 {
+    display: flex;
+    flex-direction: row;
+    justify-content:center;
+    gap: 10px;
+    width: 100%;
+}
+
+
 .vodoravno .parameter {
     background: #1b1b1b5b;
     border-radius: 10px;
@@ -265,5 +274,12 @@
   .turbulence {
     animation: turbulence 0.5s ease-in-out;
     animation-iteration-count: 3;
+  }
+
+  /* toolbar_icons */
+  .icon_toolbar{
+    color: #fff;
+    opacity: 100%;
+
   }
   
