@@ -1,57 +1,54 @@
 import { useState, useEffect, useRef } from "react";
 
 const useWebSocket = (url) => {
-	const [data, setData] = useState(null);
-	const [isConnected, setIsConnected] = useState(false);
-	const socketRef = useRef(null);
+    const [data, setData] = useState(null);
+    const socketRef = useRef(null);
 
-	useEffect(() => {
-		const connect = () => {
-			const ws = new WebSocket(url);
-			socketRef.current = ws;
+    useEffect(() => {
+        const connect = () => {
+            const ws = new WebSocket(url);
+            socketRef.current = ws;
 
-			ws.onopen = () => {
-				console.log("WebSocket connection established");
-				setIsConnected(true);
-			};
+            ws.onopen = () => {
+                console.log("WebSocket connection established");
+            };
 
-			ws.onmessage = (event) => {
-				const receivedData = JSON.parse(event.data);
-				setData(receivedData);
-				console.log("Data from server:", receivedData); // Print incoming messages
-			};
+            ws.onmessage = (event) => {
+                const receivedData = JSON.parse(event.data);
+                setData(receivedData);
+                console.log("Data from server:", receivedData); // Print incoming messages
+            };
 
-			ws.onclose = () => {
-				console.log("WebSocket connection closed");
-				setIsConnected(false);
-				// Attempt to reconnect every 2 seconds
-				setTimeout(connect, 2000);
-			};
+            ws.onclose = () => {
+                console.log("WebSocket connection closed");
+                // Attempt to reconnect every 2 seconds
+                setTimeout(connect, 2000);
+            };
 
-			ws.onerror = (error) => {
-				console.error("WebSocket error:", error);
-				ws.close();
-			};
-		};
+            ws.onerror = (error) => {
+                console.error("WebSocket error:", error);
+                ws.close();
+            };
+        };
 
-		connect();
+        connect();
 
-		return () => {
-			if (socketRef.current) {
-				socketRef.current.close();
-			}
-		};
-	}, [url]);
+        return () => {
+            if (socketRef.current) {
+                socketRef.current.close();
+            }
+        };
+    }, [url]);
 
-	const sendMessage = (message) => {
-		if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-			socketRef.current.send(JSON.stringify(message));
-		} else {
-			console.error("WebSocket is not open. Unable to send message:", message);
-		}
-	};
+    const sendMessage = (message) => {
+        if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+            socketRef.current.send(JSON.stringify(message));
+        } else {
+            console.error("WebSocket is not open. Unable to send message:", message);
+        }
+    };
 
-	return { data, sendMessage, isConnected };
+    return { data, sendMessage };
 };
 
 export default useWebSocket;
