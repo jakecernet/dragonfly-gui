@@ -190,27 +190,40 @@ function Dashboard({
                 let newStatus = { ...component_status };
                 WebSocketData.payload[0] = parseInt(WebSocketData.payload[0]);
                 WebSocketData.payload[1] = Boolean(WebSocketData.payload[1]);
+                console.log(WebSocketData);
 
                 if (WebSocketData.payload[0] === 1) {
-                    newStatus["GPS"] = WebSocketData.payload[1]
-                        ? ["ok", "GPS is connected"]
-                        : ["warning", "GPS is not connected"];
-
-					setInitialHeight(WebSocketData.payload[2].currentAltitude.toFixed(0));
-                }
-
-                if (WebSocketData.payload[0] === 2) {
                     newStatus["BMP"] = WebSocketData.payload[1]
                         ? ["ok", "BMP is connected"]
                         : ["warning", "BMP is not connected"];
+                        setInitialHeight(WebSocketData.payload[2].currentAltitude.toFixed(0));
+                       
+				 }
 
-					
+                if (WebSocketData.payload[0] === 2) {
+                    if(WebSocketData.payload[2].GPSLatitude != false && WebSocketData.payload[2].GPSLongitude != false) {
+                        newStatus["GPS"] = ["ok", "GPS is connected"];
+                        setInitialGPS(WebSocketData.payload[2].GPSLatitude + "," + WebSocketData.payload[2].GPSLongitude);
+                        setInitialGPSdisplay(WebSocketData.payload[2].GPSLatitude + "," + WebSocketData.payload[2].GPSLongitude);
+                        data.GPSCords.latitude = parseFloat(WebSocketData.payload[2].GPSLatitude);
+                        data.GPSCords.longitude = parseFloat(WebSocketData.payload[2].GPSLongitude);
+
+                    } else {
+                        newStatus["GPS"] = ["warning", "GPS is outputs invalid numbers"];
+                    }              
                 }
                 if (WebSocketData.payload[0] === 3) {
                     newStatus["Lora"] = WebSocketData.payload[1]
                         ? ["ok", "Lora is connected"]
                         : ["warning", "Lora is not connected"];
                 }
+
+                if (WebSocketData.payload[0] === 7) {
+                    newStatus["ESP"] = WebSocketData.payload[1]
+                        ? ["ok", "ESP is connected"]
+                        : ["warning", "ESP is not connected"];
+                }
+
                 if(WebSocketData.payload[0] === 6) {
                     console.log(WebSocketData.data);
                 }
@@ -227,15 +240,9 @@ function Dashboard({
     }, [InitialGPS, flightNumber, WebSocketData, vehicleStatus]);
 
     const handleInitGPS = () => {
-        setInitialGPS(data.GPSCords.latitude + "," + data.GPSCords.longitude);
-        let positionShort = [
-            data.GPSCords.latitude.toFixed(6),
-            ", ",
-            data.GPSCords.longitude.toFixed(6),
-        ];
-        setInitialGPSdisplay(positionShort.join(""));
-
-        setInitialHeight(data.GPSHeight);
+        setInitialGPSdisplay("N/A");
+        setInitialGPS(position[0] + "," + position[1]);
+        setInitialGPSdisplay(position[0] + "," + position[1]);
     };
 
     const HandleEndFlight = () => {

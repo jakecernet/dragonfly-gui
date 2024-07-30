@@ -35,13 +35,13 @@ function App() {
     const [displayData, setDisplayData] = useState({
         initialTime: 1,
         GPSCords: {
-            latitude: 46.11775450274306,
-            longitude: 14.022392745016298,
+            latitude: 0,
+            longitude: 0,
         },
-        PressureHeight: 870,
-        GPSHeight: 860,
+        PressureHeight: 0,
+        GPSHeight: 0,
         RelativeHeight: 0,
-        InitialHeight: 860,
+        InitialHeight: 0,
         Pressure: 2,
         BatteryVoltage: 5,
         Temperature: 27,
@@ -73,7 +73,8 @@ function App() {
     const [component_status, setComponent_status] = useState({
         "GPS": ["error", "UI waiting to get info"],
         "BMP": ["error", "UI waiting to get info"],
-        "Lora": ["error", "UI waiting to get info"]
+        "Lora": ["error", "UI waiting to get info"],
+        "ESP": ["error", "UI waiting to get info"]
     });
 
     useEffect(() => {
@@ -115,7 +116,7 @@ function App() {
 
     const handleKeyPress = (event) => {
         if (event.key === "Enter") {
-            if (inputFlightNumber.length !== 0) {
+            if (inputFlightNumber.length !== 0 && inputFlightNumber != " ") {
                 setFlightNumber(inputFlightNumber);
                 document.getElementById("overlay").style.display = "none";
             } else {
@@ -181,6 +182,21 @@ function App() {
                     <hr className="pre-nav-hr"></hr>
                     <div className="pre-body">
                         <ul>
+                        <li>
+                                <h3>ESP</h3>
+                                <img
+                                    src={getStatusIcon(component_status.ESP[0])}
+                                    onMouseEnter={() => {
+                                        document.getElementById("errorDisplay").innerHTML = component_status["ESP"][1];
+                                    }}
+                                    onMouseLeave={() => {
+                                        document.getElementById("errorDisplay").innerHTML = ""
+                                    }}
+                                    alt="ESP status"
+                                />
+                            </li>
+                            <hr></hr>
+
                             <li>
                                 <h3>GPS module</h3>
                                 <img
