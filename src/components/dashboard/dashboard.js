@@ -10,9 +10,9 @@ import L from "leaflet";
 
 import locationMarker from "../../icons/rocket.png";
 import homeMarker from "../../icons/home.png";
-import settingsIcon from "../../icons/settings.svg";
-import connectedIcon from "../../icons/connected.svg";
-import errorIcon from "../../icons/error.svg";
+import tickicon from "../../icons/tick.svg";
+import erroricon from "../../icons/error.svg";
+import warningicon from "../../icons/warning.svg";
 import saveIcon from "../../icons/save.svg";
 import checkIcon from "../../icons/check.svg";
 import homepointIcon from "../../icons/home.svg";
@@ -32,6 +32,18 @@ const HomeIcon = new L.Icon({
 	iconAnchor: [25, 50],
 });
 
+const getStatusIcon = (status) => {
+	switch (status) {
+		case "warning":
+			return warningicon;
+		case "ok":
+			return tickicon;
+		case "error":
+			return erroricon;
+		default:
+			return warningicon;
+	}
+};
 
 const circleDisplay = ({ value, unit, maxRange, color }) => {
 	return (
@@ -62,6 +74,8 @@ function Dashboard({
 	setInitialFlightTime,
 	initialFlightTime,
 	initialUptime,
+	setComponent_status,
+	component_status
 }) {
 	const { data: WebSocketData, sendMessage } = useWebSocket(
 		"ws://localhost:8764"
@@ -70,6 +84,7 @@ function Dashboard({
 	const [InitialHeight, setInitialHeight] = useState("N/A");
 	const [InitialGPS, setInitialGPS] = useState("N/A");
 	const [initialGPSdisplay, setInitialGPSdisplay] = useState("N/A");
+
 	let temperature = data.Temperature;
 	let PressureHeight = data.PressureHeight;
 	let voltage = data.BatteryVoltage.toFixed(2);
@@ -85,7 +100,6 @@ function Dashboard({
 	const [beeperStatus, setBeeperStatus] = useState(beeperEnabled);
 
 	const [positionFromLaunchpad, setPositionFromLaunchpad] = useState("N/A");
-
 
 	useEffect(() => {
 		const output = haversineDistance(
@@ -137,8 +151,6 @@ function Dashboard({
 	};
 
 	const initVehicleLaunch = () => {
-
-
 		if (
 			vehicleStatus === "Armed" &&
 			InitialHeight !== "N/A" &&
@@ -170,13 +182,44 @@ function Dashboard({
 	}, [InitialHeight]);
 
 	useEffect(() => {
-		sendMessage({ command: "initial_gps", payload: InitialGPS });
 		if (WebSocketData) {
 			if (WebSocketData.command === "view_only") {
 				setVehicleStatus("View only");
 				setAnalysisData(WebSocketData.payload);
 			}
+
+			if(WebSocketData.command === "component_status") {
+				let newStatus = { ...component_status };
+				WebSocketData.payload[0] = parseInt(WebSocketData.payload[0]);
+				WebSocketData.payload[1] = Boolean(WebSocketData.payload[1]);
+
+				if (WebSocketData.payload[0] === 1) {
+					newStatus["GPS"] = WebSocketData.payload[1]
+						? ["ok", "GPS is connected"]
+						: ["warning", "GPS is not connected"];
+				}
+
+				if (WebSocketData.payload[0] === 2) {
+					newStatus["BMP"] = WebSocketData.payload[1]
+						? ["ok", "BMP is connected"]
+						: ["warning", "BMP is not connected"];
+				}
+				if (WebSocketData.payload[0] === 3) {
+					newStatus["Lora"] = WebSocketData.payload[1]
+						? ["ok", "Lora is connected"]
+						: ["warning", "Lora is not connected"];
+				}
+				if(WebSocketData.payload[0] === 6) {
+					console.log(WebSocketData.data);
+				}
+
+				setComponent_status(newStatus);
+				
+				console.log(newStatus);
+			}
 		}
+
+		sendMessage({ command: "initial_gps", payload: InitialGPS });
 		sendMessage({
 			command: "flight_number",
 			payload: flightNumber,
@@ -197,7 +240,6 @@ function Dashboard({
 		setInitialGPSdisplay(positionShort.join(""));
 
 		setInitialHeight(data.GPSHeight);
-
 	};
 
 	const HandleEndFlight = () => {
@@ -239,20 +281,16 @@ function Dashboard({
 						<p>{PressureHeight} m</p>
 					</div>
 					<div>
-
 						<h2>Initial height</h2>
 						<p>{InitialHeight} m</p>
-
 					</div>
-
 				</div>
 				<div className="heights">
 					<div>
-						<h2>Distance form launchpad</h2>
+						<h2>Distance from launchpad</h2>
 						<p>{positionFromLaunchpad} m</p>
 					</div>
 				</div>
-
 			</section>
 			<section className="main-four">
 				<div className="vodoravno">
@@ -285,57 +323,46 @@ function Dashboard({
 					</div>
 					
 					<selection className="vodoravno2">
-
-					<div
-						onClick={vehicleStatus === "Launched" ? HandleEndFlight : null}
-						style={{
-							opacity: vehicleStatus === "Launched" ? 1 : 0.2,
-							cursor: vehicleStatus === "Launched" ? "pointer" : "not-allowed",
-							pointerEvents: vehicleStatus === "Launched" ? 'auto' : 'none', // Disable click interactions
-						}}
-					>
-						<h2>
-							<img src={saveIcon} alt="End flight" />
-			
-						</h2>
-					</div>
-
-
-
-					<div
-						onClick={vehicleStatus === "Ready" ? openPreFlightCheck : undefined}
-						style={{
-							opacity: vehicleStatus === "Ready" ? 1 : 0.2,
-							pointerEvents: vehicleStatus === "Ready" ? 'auto' : 'none', // Disable click events when not ready
-						}}
-					>
-						<h2
+						<div
+							onClick={vehicleStatus === "Launched" ? HandleEndFlight : null}
 							style={{
-								cursor: vehicleStatus === "Ready" ? "pointer" : "not-allowed", // Change cursor based on readiness
+								opacity: vehicleStatus === "Launched" ? 1 : 0.2,
+								cursor: vehicleStatus === "Launched" ? "pointer" : "not-allowed",
+								pointerEvents: vehicleStatus === "Launched" ? 'auto' : 'none',
 							}}
 						>
-							
-							<img src={checkIcon} alt="Open pre-flight checklist" />
-			
-							
-						</h2>
-					</div>
-
-					<div
-						onClick={vehicleStatus === "Ready" ? handleInitGPS : null}
-						style={{
-							opacity: vehicleStatus === "Ready" ? 1 : 0.2,
-							pointerEvents: vehicleStatus === "Ready" ? 'auto' : 'none', // Prevent clicks when disabled
-						}}
-					>
-						<h2>
-							<img src={homepointIcon} alt="Set homepoint" />
-						</h2>
-					</div>
-
-				</selection>
+							<h2>
+								<img src={saveIcon} alt="End flight" />
+							</h2>
+						</div>
+						<div
+							onClick={vehicleStatus === "Ready" ? openPreFlightCheck : undefined}
+							style={{
+								opacity: vehicleStatus === "Ready" ? 1 : 0.2,
+								pointerEvents: vehicleStatus === "Ready" ? 'auto' : 'none',
+							}}
+						>
+							<h2
+								style={{
+									cursor: vehicleStatus === "Ready" ? "pointer" : "not-allowed",
+								}}
+							>
+								<img src={checkIcon} alt="Open pre-flight checklist" />
+							</h2>
+						</div>
+						<div
+							onClick={vehicleStatus === "Ready" ? handleInitGPS : null}
+							style={{
+								opacity: vehicleStatus === "Ready" ? 1 : 0.2,
+								pointerEvents: vehicleStatus === "Ready" ? 'auto' : 'none',
+							}}
+						>
+							<h2>
+								<img src={homepointIcon} alt="Set homepoint" />
+							</h2>
+						</div>
+					</selection>
 				</div>
-
 				<div className="vodoravno">
 					<div
 						className="launch"
@@ -365,7 +392,7 @@ function Dashboard({
 						}}>
 						<button
 							id="launch_button"
-							disabled={vehicleStatus === "Armed" ? false : true}
+							disabled={vehicleStatus !== "Armed"}
 							style={{
 								cursor:
 									vehicleStatus === "Armed"

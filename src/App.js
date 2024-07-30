@@ -9,285 +9,320 @@ import dashboardIcon from "./icons/dashboard.svg";
 import settingsIcon from "./icons/settings.svg";
 import closeIcon from "./icons/close.svg";
 import analysisIcon from "./icons/analysis.svg";
+
 import erroricon from "./icons/error.svg";
 import tickicon from "./icons/tick.svg";
 import warningicon from "./icons/warning.svg";
 
-import GetData from "./components/tools/Simulator.mjs";
+
+const getStatusIcon = (status) => {
+
+    switch (status) { 
+        case "warning":
+            return warningicon;
+        case "ok":
+            return tickicon;
+        case "error":
+            return erroricon;
+        default:
+            return warningicon;
+    }
+};
 
 function App() {
-	const [selected, setSelected] = useState("dashboard");
-	const [AnalysisData, setAnalysisData] = useState("");
-	const [displayData, setDisplayData] = useState(GetData());
-	const [flightNumber, setFlightNumber] = useState("");
-	const inputRef = useRef(null);
-	const [vehicleStatus, setVehicleStatus] = useState("Ready");
-	const [inputFlightNumber, setInputFlightNumber] = useState("");
-	const [initialUptime, setInitialUptime] = useState(
-		Math.floor(Date.now() / 1000)
-	);
-	const [initialFlightTime, setInitialFlightTime] = useState(false);
+    const [selected, setSelected] = useState("dashboard");
+    const [AnalysisData, setAnalysisData] = useState("");
+    const [displayData, setDisplayData] = useState({
+        initialTime: 1,
+        GPSCords: {
+            latitude: 46.11775450274306,
+            longitude: 14.022392745016298,
+        },
+        PressureHeight: 870,
+        GPSHeight: 860,
+        RelativeHeight: 0,
+        InitialHeight: 860,
+        Pressure: 2,
+        BatteryVoltage: 5,
+        Temperature: 27,
+        AccelerationX: 0,
+        AccelerationY: 0,
+        AccelerationZ: 0,
+        BeeperStatus: Math.random() > 0.5,
+        ServoParachuteStatus: 0,
+        Armed: Math.random() > 0.5,
+        InFlight: Math.random() > 0.5,
+        FlightTime: 0,
+        Uptime: 0,
+        speedUnit: "km/h",
+        PressureUnit: "Bar",
+        TimeUnit: "s",
+    });
+    const [flightNumber, setFlightNumber] = useState("");
+    const inputRef = useRef(null);
+    const [vehicleStatus, setVehicleStatus] = useState("Ready");
+    const [inputFlightNumber, setInputFlightNumber] = useState("");
+    const [initialUptime, setInitialUptime] = useState(
+        Math.floor(Date.now() / 1000)
+    );
+    const [initialFlightTime, setInitialFlightTime] = useState(false);
 
-	const [distanceUnit, setDistanceUnit] = useState("m");
-	const [timeUnit, setTimeUnit] = useState("s");
+    const [distanceUnit, setDistanceUnit] = useState("m");
+    const [timeUnit, setTimeUnit] = useState("s");
 
-	useEffect(() => {
-		const handleEscape = (event) => {
-			if (event.key === "Escape") {
-				document.getElementById("pre-flight").style.display = "none";
-			}
-		};
+    const [component_status, setComponent_status] = useState({
+        "GPS": ["error", "UI waiting to get info"],
+        "BMP": ["error", "UI waiting to get info"],
+        "Lora": ["error", "UI waiting to get info"]
+    });
 
-		document.addEventListener("keydown", handleEscape);
-		return () => {
-			document.removeEventListener("keydown", handleEscape);
-		};
-	}, []);
+    useEffect(() => {
+        const handleEscape = (event) => {
+            if (event.key === "Escape") {
+                document.getElementById("pre-flight").style.display = "none";
+            }
+        };
 
-	useEffect(() => {
-		if (flightNumber.length > 10) {
-			setFlightNumber(flightNumber.slice(0, 10));
-		}
-	}, [flightNumber]);
+        document.addEventListener("keydown", handleEscape);
+        return () => {
+            document.removeEventListener("keydown", handleEscape);
+        };
+    }, []);
 
-	useEffect(() => {
-		const interval = setInterval(() => {
-			const newData = GetData();
-			setDisplayData(newData);
-		}, 200);
+    useEffect(() => {
+        if (flightNumber.length > 10) {
+            setFlightNumber(flightNumber.slice(0, 10));
+        }
+    }, [flightNumber]);
 
-		return () => clearInterval(interval);
-	}, []);
+    useEffect(() => {
+        if (inputRef.current) {
+            inputRef.current.focus();
+        }
+    }, []);
 
-	useEffect(() => {
-		if (inputRef.current) {
-			inputRef.current.focus();
-		}
-	}, []);
+    useEffect(() => {
+        if (vehicleStatus === "Ready") {
+            document.body.classList.toggle("armed", false);
+            document.body.classList.toggle("ready", true);
+            document.title = `Flight ${flightNumber} - Ready`;
+        } else {
+            document.body.classList.toggle("armed", true);
+            document.body.classList.toggle("ready", false);
+            document.title = `Flight ${flightNumber} - ${vehicleStatus}`;
+        }
+    }, [vehicleStatus, flightNumber]);
 
-	useEffect(() => {
-		if (vehicleStatus === "Ready") {
-			document.body.classList.toggle("armed", false);
-			document.body.classList.toggle("ready", true);
-			document.title = `Flight ${flightNumber} - Ready`;
-		} else {
-			document.body.classList.toggle("armed", true);
-			document.body.classList.toggle("ready", false);
-			document.title = `Flight ${flightNumber} - ${vehicleStatus}`;
-		}
-	}, [vehicleStatus, flightNumber]);
+    const handleKeyPress = (event) => {
+        if (event.key === "Enter") {
+            if (inputFlightNumber.length !== 0) {
+                setFlightNumber(inputFlightNumber);
+                document.getElementById("overlay").style.display = "none";
+            } else {
+                document.getElementById("box").classList.add("turbulence");
+                setTimeout(() => {
+                    document.getElementById("box").classList.remove("turbulence");
+                }, 300);
+            }
+        }
+    };
 
-	const handleKeyPress = (event) => {
-		if (event.key === "Enter") {
-			if (inputFlightNumber.length !== 0) {
-				setFlightNumber(inputFlightNumber);
-				document.getElementById("overlay").style.display = "none";
-			} else {
-				document.getElementById("box").classList.add("turbulence");
-				setTimeout(() => {
-					document.getElementById("box").classList.remove("turbulence");
-				}, 300);
-			}
-		}
-	}
-	const handleInputChange = (event) => {
-		setInputFlightNumber(event.target.value);
-		if (inputRef.current) {
-			inputRef.current.style.width = `${event.target.value.length + 1}ch`;
-		}
-	};
+    const handleInputChange = (event) => {
+        setInputFlightNumber(event.target.value);
+        if (inputRef.current) {
+            inputRef.current.style.width = `${event.target.value.length + 1}ch`;
+        }
+    };
 
-	useEffect(() => {
-		if (flightNumber.length === 0) {
-			inputRef.current.style.width = "17ch";
-		}
-	}, [flightNumber]);
+    useEffect(() => {
+        if (flightNumber.length === 0) {
+            inputRef.current.style.width = "17ch";
+        }
+    }, [flightNumber]);
 
-	useEffect(() => {
-		if (vehicleStatus === "View only") {
-			setSelected("analysis");
-			document.querySelector(".right").style.opacity = "0";
-			document.querySelector(
-				"nav ul li:nth-child(1)"
-			).style.pointerEvents = "none";
-			document.querySelector("nav ul li:nth-child(1)").style.opacity =
-				"0.5";
-			document.querySelector(
-				"nav ul li:nth-child(2)"
-			).style.pointerEvents = "auto";
-			document.querySelector("nav ul li:nth-child(2)").style.opacity =
-				"1";
-			document.querySelector(
-				"nav ul li:nth-child(3)"
-			).style.pointerEvents = "none";
-			document.querySelector("nav ul li:nth-child(3)").style.opacity =
-				"0.5";
-		} else {
-			document.querySelector(".right").style.opacity = "1";
-			document.querySelector(
-				"nav ul li:nth-child(2)"
-			).style.pointerEvents = "none";
-			document.querySelector("nav ul li:nth-child(2)").style.opacity =
-				"0.5";
-		}
-		if (vehicleStatus === "Launched") {
-			document.getElementById("colored").style.color = "red";
-		}
-	}, [vehicleStatus]);
+    useEffect(() => {
+        if (vehicleStatus === "View only") {
+            setSelected("analysis");
+            document.querySelector(".right").style.opacity = "0";
+            document.querySelector("nav ul li:nth-child(1)").style.pointerEvents = "none";
+            document.querySelector("nav ul li:nth-child(1)").style.opacity = "0.5";
+            document.querySelector("nav ul li:nth-child(2)").style.pointerEvents = "auto";
+            document.querySelector("nav ul li:nth-child(2)").style.opacity = "1";
+            document.querySelector("nav ul li:nth-child(3)").style.pointerEvents = "none";
+            document.querySelector("nav ul li:nth-child(3)").style.opacity = "0.5";
+        } else {
+            document.querySelector(".right").style.opacity = "1";
+            document.querySelector("nav ul li:nth-child(2)").style.pointerEvents = "none";
+            document.querySelector("nav ul li:nth-child(2)").style.opacity = "0.5";
+        }
+        if (vehicleStatus === "Launched") {
+            document.getElementById("colored").style.color = "red";
+        }
+    }, [vehicleStatus]);
 
-	return (
-		<div>
-			<div className="pre-flight" id="pre-flight">
-				<div className="pre-box">
-					<div className="pre-title">
-						<h2 id="errorDisplay"></h2>
-						
-						<button
-							onClick={() => {
-								document.querySelector(
-									".pre-flight"
-								).style.display = "none";
-							}}>
-							<img src={closeIcon} alt="Close" />
-						</button>
-					</div>
-					<hr className="pre-nav-hr"></hr>
-					<div className="pre-body">
-					<ul>
-						<li>
-							<h3>GPS module</h3>
-							<img
-								src={erroricon}
-							/>
-						</li>
-						<hr></hr>
-						<li>
-							<h3>BMP 280</h3>
-							<img
-							onMouseEnter={() => {
-								document.getElementById("errorDisplay").innerHTML = "Besedilo o napakDDDi";
-							}
-							}
-							onMouseLeave={() => {
-								document.getElementById("errorDisplay").innerHTML = ""
-							}
-							}
-								src={warningicon}
-							/>
-						</li>
-						<hr></hr>
-						<li>
-							<h3>Lora module</h3>
-							<img
-								src={tickicon}
-							/>
-						</li>
-						<hr></hr>
-						
-					</ul>
-					</div>
-				</div>
-				
-			</div>
+    useEffect(() => {
+        console.log(component_status);
+    }, [component_status]);
 
-			<div className="overlay" id="overlay">
-				<div className="box" id="box">
-					<div className="div_organize">
-						<input
-							ref={inputRef}
-							type="text"
-							placeholder="Enter flight number"
-							value={inputFlightNumber}
-							onChange={handleInputChange}
-							onKeyPress={handleKeyPress}
-							style={{ width: `${flightNumber.length + 1}ch` }}
-						/>
-						<div className="fat_cursor"></div>
-					</div>
-				</div>
-			</div>
-			<div className="status">
-				<div className="left">
-					<h2>
-						Vehicle status:{" "}
-						<span
-							id="colored"
-							style={{
-								color:
-									vehicleStatus === "Ready"
-										? "rgba(0, 255, 0, 0.745)"
-										: "yellow",
-							}}>
-							{vehicleStatus}
-						</span>
-					</h2>
-				</div>
-				<div className="center">
-					<h1>Flight {flightNumber}</h1>
-				</div>
-				<div className="right">
-					<h2>
-						Flight time:{" "}
-						{initialFlightTime
-							? (Date.now() / 1000 - initialFlightTime).toFixed(1)
-							: "N/A"}
-					</h2>
-					<h2>
-						Uptime: {(Date.now() / 1000 - initialUptime).toFixed(1)} {timeUnit}
-					</h2>
-				</div>
-			</div>
-			<div className="content">
-				{selected === "dashboard" && (
-					<Dashboard
-						data={displayData}
-						setVehicleStatus={setVehicleStatus}
-						vehicleStatus={vehicleStatus}
-						setFlightNumber={setFlightNumber}
-						flightNumber={flightNumber}
-						setAnalysisData={setAnalysisData}
-						setInitialFlightTime={setInitialFlightTime}
-						initialFlightTime={initialFlightTime}
-						initialUptime={initialUptime}
-						setInitialUptime={setInitialUptime}
-						distanceUnit={distanceUnit}
-					/>
-				)}
-				{selected === "analysis" && (
-					<Analysis AnalysisData={AnalysisData} />
-				)}
-				{selected === "settings" && (
-					<Settings
-						data={displayData}
-						setDistanceUnit={setDistanceUnit}
-						setTimeUnit={setTimeUnit}
-					/>
-				)}
-			</div>
-			<nav>
-				<ul>
-					<li onClick={() => setSelected("dashboard")}>
-						<a>
-							<img src={dashboardIcon} alt="Dashboard" />
-							Dashboard
-						</a>
-					</li>
-					<li onClick={() => setSelected("analysis")}>
-						<a>
-							<img src={analysisIcon} alt="Analysis" />
-							Analysis
-						</a>
-					</li>
-					<li onClick={() => setSelected("settings")}>
-						<a>
-							<img src={settingsIcon} alt="Settings" />
-							Settings
-						</a>
-					</li>
-				</ul>
-			</nav>
-		</div>
-	);
+    return (
+        <div>
+            <div className="pre-flight" id="pre-flight">
+                <div className="pre-box">
+                    <div className="pre-title">
+                        <h2 id="errorDisplay"></h2>
+
+                        <button
+                            onClick={() => {
+                                document.querySelector(".pre-flight").style.display = "none";
+                            }}>
+                            <img src={closeIcon} alt="Close" />
+                        </button>
+                    </div>
+                    <hr className="pre-nav-hr"></hr>
+                    <div className="pre-body">
+                        <ul>
+                            <li>
+                                <h3>GPS module</h3>
+                                <img
+                                    src={getStatusIcon(component_status.GPS[0])}
+                                    onMouseEnter={() => {
+                                        document.getElementById("errorDisplay").innerHTML = component_status["GPS"][1];
+                                    }}
+                                    onMouseLeave={() => {
+                                        document.getElementById("errorDisplay").innerHTML = ""
+                                    }}
+                                    alt="GPS status"
+                                />
+                            </li>
+                            <hr></hr>
+                            <li>
+                                <h3>BMP 280</h3>
+                                <img
+                                    src={getStatusIcon(component_status["BMP"][0])}
+                                    onMouseEnter={() => {
+                                        document.getElementById("errorDisplay").innerHTML = component_status["BMP"][1];
+                                    }}
+                                    onMouseLeave={() => {
+                                        document.getElementById("errorDisplay").innerHTML = ""
+                                    }}
+                                    alt="BMP status"
+                                />
+                            </li>
+                            <hr></hr>
+                            <li>
+                                <h3>Lora module</h3>
+                                <img
+                                    src={getStatusIcon(component_status["Lora"][0])}
+                                    onMouseEnter={() => {
+                                        document.getElementById("errorDisplay").innerHTML = component_status["Lora"][1];
+                                    }}
+                                    onMouseLeave={() => {
+                                        document.getElementById("errorDisplay").innerHTML = ""
+                                    }}
+                                    alt="Lora status"
+                                />
+                            </li>
+                            <hr></hr>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div className="overlay" id="overlay">
+                <div className="box" id="box">
+                    <div className="div_organize">
+                        <input
+                            ref={inputRef}
+                            type="text"
+                            placeholder="Enter flight number"
+                            value={inputFlightNumber}
+                            onChange={handleInputChange}
+                            onKeyPress={handleKeyPress}
+                            style={{ width: `${flightNumber.length + 1}ch` }}
+                        />
+                        <div className="fat_cursor"></div>
+                    </div>
+                </div>
+            </div>
+            <div className="status">
+                <div className="left">
+                    <h2>
+                        Vehicle status:{" "}
+                        <span
+                            id="colored"
+                            style={{
+                                color: vehicleStatus === "Ready" ? "rgba(0, 255, 0, 0.745)" : "yellow",
+                            }}>
+                            {vehicleStatus}
+                        </span>
+                    </h2>
+                </div>
+                <div className="center">
+                    <h1>Flight {flightNumber}</h1>
+                </div>
+                <div className="right">
+                    <h2>
+                        Flight time:{" "}
+                        {initialFlightTime ? (Date.now() / 1000 - initialFlightTime).toFixed(1) : "N/A"}
+                    </h2>
+                    <h2>
+                        Uptime: {(Date.now() / 1000 - initialUptime).toFixed(1)} {timeUnit}
+                    </h2>
+                </div>
+            </div>
+            <div className="content">
+                {selected === "dashboard" && (
+                    <Dashboard
+                        data={displayData}
+                        setVehicleStatus={setVehicleStatus}
+                        vehicleStatus={vehicleStatus}
+                        setFlightNumber={setFlightNumber}
+                        flightNumber={flightNumber}
+                        setAnalysisData={setAnalysisData}
+                        setInitialFlightTime={setInitialFlightTime}
+                        initialFlightTime={initialFlightTime}
+                        initialUptime={initialUptime}
+                        setInitialUptime={setInitialUptime}
+                        distanceUnit={distanceUnit}
+                        setComponent_status={setComponent_status}
+                        component_status={component_status}
+                    />
+                )}
+                {selected === "analysis" && (
+                    <Analysis AnalysisData={AnalysisData} />
+                )}
+                {selected === "settings" && (
+                    <Settings
+                        data={displayData}
+                        setDistanceUnit={setDistanceUnit}
+                        setTimeUnit={setTimeUnit}
+                    />
+                )}
+            </div>
+            <nav>
+                <ul>
+                    <li onClick={() => setSelected("dashboard")}>
+                        <a>
+                            <img src={dashboardIcon} alt="Dashboard" />
+                            Dashboard
+                        </a>
+                    </li>
+                    <li onClick={() => setSelected("analysis")}>
+                        <a>
+                            <img src={analysisIcon} alt="Analysis" />
+                            Analysis
+                        </a>
+                    </li>
+                    <li onClick={() => setSelected("settings")}>
+                        <a>
+                            <img src={settingsIcon} alt="Settings" />
+                            Settings
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    );
 }
 
 export default App;
