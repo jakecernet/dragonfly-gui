@@ -18,7 +18,7 @@ import checkIcon from "../../icons/check.svg";
 import homepointIcon from "../../icons/home.svg";
 
 import useWebSocket from "../tools/useWebSocket";
-import { haversineDistance } from "../tools/AdditionalFunctions";
+import { haversineDistance, getCurrentFormattedTime } from "../tools/AdditionalFunctions";
 
 const RocketIcon = new L.Icon({
     iconUrl: locationMarker,
@@ -67,6 +67,7 @@ const circleDisplay = ({ value, unit, maxRange, color }) => {
 
 function Dashboard({
     data,
+    setData,
     setVehicleStatus,
     vehicleStatus,
     flightNumber,
@@ -74,6 +75,7 @@ function Dashboard({
     setInitialFlightTime,
     initialFlightTime,
     initialUptime,
+    setInitialUptime,
     setComponent_status,
     component_status
 }) {
@@ -84,11 +86,10 @@ function Dashboard({
     const [initialGPSdisplay, setInitialGPSdisplay] = useState("N/A");
 
 
-    let temperature = data.Temperature;
-    let PressureHeight = data.PressureHeight;
+    let temperature = (data.Temperature).toFixed(0);
+    let PressureHeight = (data.PressureHeight).toFixed(0);
     let voltage = data.BatteryVoltage.toFixed(2);
-    let GPSHeight = data.GPSHeight;
-    let RelativeHeight = GPSHeight - InitialHeight;
+    let RelativeHeight = (PressureHeight - InitialHeight).toFixed(1);
     let servoDeployed = data.ServoParachuteStatus ? "Deployed" : "Not deployed";
     let beeperEnabled = data.BeeperStatus ? "On" : "Off";
     let position = [data.GPSCords.latitude, data.GPSCords.longitude];
@@ -137,15 +138,19 @@ function Dashboard({
     }
 
     const toggleArm = () => {
+        
         if (vehicleStatus === "Launched") {
             return;
         } else {
             if (vehicleStatus === "Ready") {
                 setVehicleStatus("Armed");
+                sendMessage({ command: "vehicle_status", payload: "Armed" });
             } else {
                 setVehicleStatus("Ready");
+                sendMessage({ command: "vehicle_status", payload: "Ready" });
             }
         }
+        
     };
 
     const initVehicleLaunch = () => {
@@ -172,6 +177,9 @@ function Dashboard({
 
     const launchVehicle = () => {
         setVehicleStatus("Launched");
+        const mytime= getCurrentFormattedTime();
+
+        sendMessage({ command: "launch", payload: mytime});
         setInitialFlightTime(Date.now() / 1000);
     };
 
@@ -190,7 +198,6 @@ function Dashboard({
                 let newStatus = { ...component_status };
                 WebSocketData.payload[0] = parseInt(WebSocketData.payload[0]);
                 WebSocketData.payload[1] = Boolean(WebSocketData.payload[1]);
-                console.log(WebSocketData);
 
                 if (WebSocketData.payload[0] === 1) {
                     newStatus["BMP"] = WebSocketData.payload[1]
@@ -201,7 +208,7 @@ function Dashboard({
 				 }
 
                 if (WebSocketData.payload[0] === 2) {
-                    if(WebSocketData.payload[2].GPSLatitude != false && WebSocketData.payload[2].GPSLongitude != false) {
+                    if(WebSocketData.payload[2].GPSLatitude !== false && WebSocketData.payload[2].GPSLongitude !== false) {
                         newStatus["GPS"] = ["ok", "GPS is connected"];
                         setInitialGPS(WebSocketData.payload[2].GPSLatitude + "," + WebSocketData.payload[2].GPSLongitude);
                         setInitialGPSdisplay(WebSocketData.payload[2].GPSLatitude + "," + WebSocketData.payload[2].GPSLongitude);
@@ -212,37 +219,79 @@ function Dashboard({
                         newStatus["GPS"] = ["warning", "GPS is outputs invalid numbers"];
                     }              
                 }
-                if (WebSocketData.payload[0] === 3) {
-                    newStatus["Lora"] = WebSocketData.payload[1]
-                        ? ["ok", "Lora is connected"]
-                        : ["warning", "Lora is not connected"];
-                }
-
+              
                 if (WebSocketData.payload[0] === 7) {
                     newStatus["ESP"] = WebSocketData.payload[1]
                         ? ["ok", "ESP is connected"]
                         : ["warning", "ESP is not connected"];
+                    setInitialUptime(Math.floor(Date.now() / 1000));
+                        
                 }
+                if (WebSocketData.payload[0] === 8) {
+                    const temp = WebSocketData.payload[2];
+                    let oldData = data;
+                    oldData.PressureHeight = temp.Altitude;
+                    oldData.GPSCords.latitude = temp.GPSLatitude;
+                    oldData.GPSCords.longitude = temp.GPSLongitude;
+                    oldData.Pressure = temp.Pressure;
+                    oldData.Temperature = temp.Temperature;
+                    
+                }
+                if (WebSocketData.payload[0] === 9) {
+                    if(vehicleStatus === "Launched") {
+                        setVehicleStatus("Free fall");
+                }
+                if (WebSocketData.payload[0] === 11) {
+                    console.log("Vehicle landed");
+                    if(vehicleStatus === "Free fall") {
+                        setVehicleStatus("Landed");
+                    }
+                }
+            }
 
-                if(WebSocketData.payload[0] === 6) {
-                    console.log(WebSocketData.data);
-                }
 
                 setComponent_status(newStatus);
             
             }
         }
 
+    }, [InitialGPS, flightNumber, WebSocketData, vehicleStatus]);
+
+    useEffect(() => {
         sendMessage({
             command: "flight_number",
             payload: flightNumber,
         });
-    }, [InitialGPS, flightNumber, WebSocketData, vehicleStatus]);
+    }, [flightNumber]);
+
+    useEffect(() => {
+        let allComponentsOk = true;
+        for (const key in component_status) {
+            if (component_status[key][0] !== "ok") {
+                allComponentsOk = false;
+            }
+        }
+        if (allComponentsOk) {
+            //console.log("All components are ok");
+            
+        }
+    }, [component_status]);
+
 
     const handleInitGPS = () => {
-        setInitialGPSdisplay("N/A");
-        setInitialGPS(position[0] + "," + position[1]);
-        setInitialGPSdisplay(position[0] + "," + position[1]);
+        const temp = {
+            currentAltitude: data.PressureHeight,
+            GPSLatitude: data.GPSCords.latitude,
+            GPSLongitude: data.GPSCords.longitude,
+        };
+        setInitialGPS(temp.GPSLatitude + "," + temp.GPSLongitude);
+        setInitialHeight((temp.currentAltitude).toFixed(0));
+
+        sendMessage({
+            command: "set_homepoint",
+            payload: temp,
+        });
+
     };
 
     const HandleEndFlight = () => {
@@ -276,11 +325,7 @@ function Dashboard({
                         <p>{RelativeHeight} m</p>
                     </div>
                     <div>
-                        <h2>GPS height</h2>
-                        <p>{GPSHeight} m</p>
-                    </div>
-                    <div>
-                        <h2>Pressure height</h2>
+                        <h2>Absolute height</h2>
                         <p>{PressureHeight} m</p>
                     </div>
                     <div>

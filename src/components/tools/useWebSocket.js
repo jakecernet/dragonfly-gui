@@ -16,7 +16,6 @@ const useWebSocket = (url) => {
             ws.onmessage = (event) => {
                 const receivedData = JSON.parse(event.data);
                 setData(receivedData);
-                console.log("Data from server:", receivedData); // Print incoming messages
             };
 
             ws.onclose = () => {

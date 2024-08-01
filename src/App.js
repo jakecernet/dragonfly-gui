@@ -32,8 +32,9 @@ const getStatusIcon = (status) => {
 function App() {
     const [selected, setSelected] = useState("dashboard");
     const [AnalysisData, setAnalysisData] = useState("");
+    const [displayUptime, setDisplayUptime] = useState(0);
     const [displayData, setDisplayData] = useState({
-        initialTime: 1,
+        initialTime: 0,
         GPSCords: {
             latitude: 0,
             longitude: 0,
@@ -48,10 +49,10 @@ function App() {
         AccelerationX: 0,
         AccelerationY: 0,
         AccelerationZ: 0,
-        BeeperStatus: Math.random() > 0.5,
+        BeeperStatus: 0,
         ServoParachuteStatus: 0,
-        Armed: Math.random() > 0.5,
-        InFlight: Math.random() > 0.5,
+        Armed: 0,
+        InFlight: 0,
         FlightTime: 0,
         Uptime: 0,
         speedUnit: "km/h",
@@ -62,9 +63,7 @@ function App() {
     const inputRef = useRef(null);
     const [vehicleStatus, setVehicleStatus] = useState("Ready");
     const [inputFlightNumber, setInputFlightNumber] = useState("");
-    const [initialUptime, setInitialUptime] = useState(
-        Math.floor(Date.now() / 1000)
-    );
+    const [initialUptime, setInitialUptime] = useState(0);
     const [initialFlightTime, setInitialFlightTime] = useState(false);
 
     const [distanceUnit, setDistanceUnit] = useState("m");
@@ -73,7 +72,6 @@ function App() {
     const [component_status, setComponent_status] = useState({
         "GPS": ["error", "UI waiting to get info"],
         "BMP": ["error", "UI waiting to get info"],
-        "Lora": ["error", "UI waiting to get info"],
         "ESP": ["error", "UI waiting to get info"]
     });
 
@@ -101,6 +99,19 @@ function App() {
             inputRef.current.focus();
         }
     }, []);
+
+    useEffect(() => {
+        if (initialUptime > 0) {
+            const interval = setInterval(() => {
+                setDisplayUptime(((Date.now() / 1000) - initialUptime).toFixed(1));
+            }, 50);
+        
+            return () => clearInterval(interval);
+        } else {
+            setDisplayUptime(0);
+        }
+    }, [initialUptime]);
+    
 
     useEffect(() => {
         if (vehicleStatus === "Ready") {
@@ -161,9 +172,6 @@ function App() {
         }
     }, [vehicleStatus]);
 
-    useEffect(() => {
-        console.log(component_status);
-    }, [component_status]);
 
     return (
         <div>
@@ -225,20 +233,7 @@ function App() {
                                 />
                             </li>
                             <hr></hr>
-                            <li>
-                                <h3>Lora module</h3>
-                                <img
-                                    src={getStatusIcon(component_status["Lora"][0])}
-                                    onMouseEnter={() => {
-                                        document.getElementById("errorDisplay").innerHTML = component_status["Lora"][1];
-                                    }}
-                                    onMouseLeave={() => {
-                                        document.getElementById("errorDisplay").innerHTML = ""
-                                    }}
-                                    alt="Lora status"
-                                />
-                            </li>
-                            <hr></hr>
+                           
                         </ul>
                     </div>
                 </div>
@@ -282,7 +277,7 @@ function App() {
                         {initialFlightTime ? (Date.now() / 1000 - initialFlightTime).toFixed(1) : "N/A"}
                     </h2>
                     <h2>
-                        Uptime: {(Date.now() / 1000 - initialUptime).toFixed(1)} {timeUnit}
+                        Uptime: {displayUptime} {timeUnit}
                     </h2>
                 </div>
             </div>
@@ -290,6 +285,7 @@ function App() {
                 {selected === "dashboard" && (
                     <Dashboard
                         data={displayData}
+                        setData={setDisplayData}
                         setVehicleStatus={setVehicleStatus}
                         vehicleStatus={vehicleStatus}
                         setFlightNumber={setFlightNumber}
