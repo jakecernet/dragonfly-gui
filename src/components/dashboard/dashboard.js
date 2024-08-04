@@ -100,6 +100,8 @@ function Dashboard({
 	let beeperEnabled = data.BeeperStatus ? "On" : "Off";
 	let position = [data.GPSCords.latitude, data.GPSCords.longitude];
 
+	const controlStatus = vehicleStatus === "Ready" && InitialGPS !== "N/A!" ? true : false
+
 	let countdownNumber = 5;
 
 	const [servoStatus, setServoStatus] = useState(servoDeployed);
@@ -114,7 +116,7 @@ function Dashboard({
 			data.GPSCords.longitude
 		);
 		setPositionFromLaunchpad(output.toFixed(1));
-	}, [data.GPSCords.latitude, data.GPSCords.longitude]);
+	}, [data.GPSCords.latitude, data.GPSCords.longitude, InitialGPS]);
 
 	const handleServoClick = () => {
 		setServoStatus(
@@ -256,6 +258,20 @@ function Dashboard({
 					oldData.GPSCords.longitude = temp.GPSLongitude;
 					oldData.Pressure = temp.Pressure;
 					oldData.Temperature = temp.Temperature;
+
+					if(temp.GPSLatitude !== false && temp.GPSLongitude !== false && InitialGPS === "N/A"){
+						newStatus["GPS"] = ["ok", "GPS is connected"];
+						setInitialGPS(
+							temp.GPSLatitude + "," + temp.GPSLongitude
+						);
+						setInitialGPSdisplay(
+							temp.GPSLatitude + "," + temp.GPSLongitude
+						);
+					}
+						
+					
+
+
 				}
 				if (WebSocketData.payload[0] === 9) {
 					if (vehicleStatus === "Launched") {
@@ -481,12 +497,12 @@ function Dashboard({
 						</div>
 						<div
 							onClick={
-								vehicleStatus === "Ready" ? handleInitGPS : null
+								controlStatus ? handleInitGPS : null
 							}
 							style={{
-								opacity: vehicleStatus === "Ready" ? 1 : 0.2,
+								opacity: controlStatus ? 1 : 0.2,
 								pointerEvents:
-									vehicleStatus === "Ready" ? "auto" : "none",
+								 controlStatus? "auto" : "none",
 							}}>
 							<img src={homepointIcon} alt="Set homepoint" />
 						</div>
