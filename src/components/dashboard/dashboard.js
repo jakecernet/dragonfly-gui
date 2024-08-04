@@ -92,7 +92,6 @@ function Dashboard({
 	const [InitialGPS, setInitialGPS] = useState("N/A");
 	const [initialGPSdisplay, setInitialGPSdisplay] = useState("N/A");
 
-	let temperature = data.Temperature.toFixed(0);
 	let PressureHeight = data.PressureHeight.toFixed(0);
 	let voltage = data.BatteryVoltage.toFixed(2);
 	let RelativeHeight = (PressureHeight - InitialHeight).toFixed(1);
@@ -426,7 +425,10 @@ function Dashboard({
 			</section>
 			<section className="main-four">
 				<div className="parameter">
-					<Gauge value={3} maxValue={6} />
+					<Gauge value={voltage} maxValue={5} />
+					<p>
+						{voltage} V
+					</p>
 				</div>
 				<div className="toolbar">
 					<div onClick={handleServoClick}>
