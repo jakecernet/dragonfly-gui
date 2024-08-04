@@ -69,15 +69,16 @@
     justify-content: center;
     height: 100%;
     width: 100%;
-    background: #000000ad;
+    background: #000000e1;
     border-radius: 10px;
     padding: 20px;
     position: fixed;
     z-index: 1000;
+    backdrop-filter: blur(5px);
 
     div {
-        width: 60%;
-        height: 80%;
+        width: 40%;
+        height: 50%;
         border: 2px solid #fff;
         background: #000000cc;
         backdrop-filter: blur(10px);
@@ -86,10 +87,9 @@
             color: #fff;
             font-size: 2rem;
             font-weight: 200;
+            font-family: Bungee;
             margin: 20px;
         }
-
-
 
         ul {
             list-style: none;
@@ -107,6 +107,7 @@
                 justify-content: space-between;
 
                 h3 {
+                    font-family: 'Bungee';
                     font-weight: 200;
                 }
 
@@ -135,6 +136,14 @@
             font-size: 1.5rem;
             font-weight: 200;
             transition: 0.2s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            img {
+                width: 30px;
+                height: 30px;
+            }
         }
 
         button:hover {
@@ -229,17 +238,9 @@
     width: 30% !important;
 }
 
-.vodoravno {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-    gap: 20px;
-    width: 100%;
-}
-
-.vodoravno .parameter {
+.parameter {
     background: #1b1b1b5b;
-    border-radius: 10px;
+    border-radius: 30%;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -249,22 +250,12 @@
     height: 200px;
 }
 
-.vodoravno .parameter .circle {
-    width: 150px;
-    width: 150px;
-    border-radius: 50%;
-    box-shadow: 0 0 10px rgb(255, 255, 255);
-}
-
-.vodoravno .parameter .circle h2 {
-    color: #fff;
-    font-weight: 200;
-}
-
-.vodoravno .parameter .circle p {
-    color: #fff;
-    font-size: 1.2rem;
-    font-weight: 150;
+.vodoravno {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-evenly;
+    gap: 20px;
+    width: 100%;
 }
 
 .toolbar {

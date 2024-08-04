@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import "./dashboard.css";
 
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
+import Gauge from "./gauge/gauge";
 
 import { MapContainer, TileLayer, Marker, useMap } from "react-leaflet";
 import "react-circular-progressbar/dist/styles.css";
@@ -324,7 +325,7 @@ function Dashboard({
 
 	return (
 		<div className="dashboard">
-			<div className="pre-flight">
+			<div className="pre-flight" id="pre-flight">
 				<div>
 					<div className="pre-title">
 						<h2 id="errorDisplay"></h2>
@@ -337,67 +338,62 @@ function Dashboard({
 							<img src={closeIcon} alt="Close" />
 						</button>
 					</div>
-						<ul>
-							<li>
-								<h3>ESP</h3>
-								<img
-									src={getStatusIcon(component_status.ESP[0])}
-									onMouseEnter={() => {
-										document.getElementById(
-											"errorDisplay"
-										).innerHTML =
-											component_status["ESP"][1];
-									}}
-									onMouseLeave={() => {
-										document.getElementById(
-											"errorDisplay"
-										).innerHTML = "";
-									}}
-									alt="ESP status"
-								/>
-							</li>
-                            <hr></hr>
-							<li>
-								<h3>GPS module</h3>
-								<img
-									src={getStatusIcon(component_status.GPS[0])}
-									onMouseEnter={() => {
-										document.getElementById(
-											"errorDisplay"
-										).innerHTML =
-											component_status["GPS"][1];
-									}}
-									onMouseLeave={() => {
-										document.getElementById(
-											"errorDisplay"
-										).innerHTML = "";
-									}}
-									alt="GPS status"
-								/>
-							</li>
-							<hr></hr>
-							<li>
-								<h3>BMP 280</h3>
-								<img
-									src={getStatusIcon(
-										component_status["BMP"][0]
-									)}
-									onMouseEnter={() => {
-										document.getElementById(
-											"errorDisplay"
-										).innerHTML =
-											component_status["BMP"][1];
-									}}
-									onMouseLeave={() => {
-										document.getElementById(
-											"errorDisplay"
-										).innerHTML = "";
-									}}
-									alt="BMP status"
-								/>
-							</li>
-							<hr></hr>
-						</ul>
+					<ul>
+						<li>
+							<h3>ESP</h3>
+							<img
+								src={getStatusIcon(component_status.ESP[0])}
+								onMouseEnter={() => {
+									document.getElementById(
+										"errorDisplay"
+									).innerHTML = component_status["ESP"][1];
+								}}
+								onMouseLeave={() => {
+									document.getElementById(
+										"errorDisplay"
+									).innerHTML = "";
+								}}
+								alt="ESP status"
+							/>
+						</li>
+						<hr></hr>
+						<li>
+							<h3>GPS module</h3>
+							<img
+								src={getStatusIcon(component_status.GPS[0])}
+								onMouseEnter={() => {
+									document.getElementById(
+										"errorDisplay"
+									).innerHTML = component_status["GPS"][1];
+								}}
+								onMouseLeave={() => {
+									document.getElementById(
+										"errorDisplay"
+									).innerHTML = "";
+								}}
+								alt="GPS status"
+							/>
+						</li>
+						<hr></hr>
+						<li>
+							<h3>BMP 280</h3>
+							<img
+								src={getStatusIcon(component_status["BMP"][0])}
+								onMouseEnter={() => {
+									document.getElementById(
+										"errorDisplay"
+									).innerHTML = component_status["BMP"][1];
+								}}
+								onMouseLeave={() => {
+									document.getElementById(
+										"errorDisplay"
+									).innerHTML = "";
+								}}
+								alt="BMP status"
+							/>
+						</li>
+						<hr></hr>
+					</ul>
 				</div>
 			</div>
 			<div className="countdown">
@@ -429,24 +425,8 @@ function Dashboard({
 				</div>
 			</section>
 			<section className="main-four">
-				<div className="vodoravno">
-					<div className="parameter">
-						{circleDisplay({
-							value: voltage,
-							unit: "V",
-							maxRange: 5,
-							color: voltage < 2 ? "red" : "rgb(43, 82, 189)",
-						})}
-					</div>
-					<div className="parameter">
-						{circleDisplay({
-							value: temperature,
-							unit: "°C",
-							maxRange: 50,
-							color:
-								temperature > 40 ? "red" : "rgb(43, 82, 189)",
-						})}
-					</div>
+				<div className="parameter">
+					<Gauge value={3} maxValue={6} />
 				</div>
 				<div className="toolbar">
 					<div onClick={handleServoClick}>
