@@ -200,6 +200,7 @@ function Dashboard({
 			}
 
 			if (WebSocketData.command === "component_status") {
+				console.log(WebSocketData.payload);
 				let newStatus = { ...component_status };
 				WebSocketData.payload[0] = parseInt(WebSocketData.payload[0]);
 				WebSocketData.payload[1] = Boolean(WebSocketData.payload[1]);
@@ -283,6 +284,17 @@ function Dashboard({
 						}
 					}
 				}
+				if(WebSocketData.payload[0] === 12){
+					newStatus["base_serial"] = WebSocketData.payload[1]
+						? ["ok", "Base serial is connected"]
+						: ["warning", "Base serial is not connected"];
+					}
+
+					if(WebSocketData.payload[0] === 13){
+						newStatus["base_lora"] = WebSocketData.payload[1]
+							? ["ok", "Base lora is connected"]
+							: ["warning", "Base lora is not connected"];
+						}
 
 				setComponent_status(newStatus);
 			}
@@ -405,6 +417,42 @@ function Dashboard({
 									).innerHTML = "";
 								}}
 								alt="BMP status"
+							/>
+						</li>
+						<hr></hr>
+						<li>
+							<h3>Base Serail Connection</h3>
+							<img
+								src={getStatusIcon(component_status.base_serial[0])}
+								onMouseEnter={() => {
+									document.getElementById(
+										"errorDisplay"
+									).innerHTML = component_status["base_serial"][1];
+								}}
+								onMouseLeave={() => {
+									document.getElementById(
+										"errorDisplay"
+									).innerHTML = "";
+								}}
+								alt="base_serial status"
+							/>
+						</li>
+						<hr></hr>
+						<li>
+							<h3>Base Lora Connection</h3>
+							<img
+								src={getStatusIcon(component_status.base_lora[0])}
+								onMouseEnter={() => {
+									document.getElementById(
+										"errorDisplay"
+									).innerHTML = component_status["base_lora"][1];
+								}}
+								onMouseLeave={() => {
+									document.getElementById(
+										"errorDisplay"
+									).innerHTML = "";
+								}}
+								alt="base_lora status"
 							/>
 						</li>
 						<hr></hr>

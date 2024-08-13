@@ -78,7 +78,8 @@
 
     div {
         width: 40%;
-        height: 50%;
+        height: fit-content;
+        padding-bottom: 35px;
         border: 2px solid #fff;
         background: #000000cc;
         backdrop-filter: blur(10px);

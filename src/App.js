@@ -70,6 +70,8 @@ function App() {
 		GPS: ["error", "UI waiting to get info"],
 		BMP: ["error", "UI waiting to get info"],
 		ESP: ["error", "UI waiting to get info"],
+		base_serial: ["error", "UI waiting to get info"],
+		base_lora: ["error", "UI waiting to get info"]
 	});
 
 	useEffect(() => {
