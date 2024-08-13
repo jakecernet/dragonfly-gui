@@ -99,7 +99,8 @@ function Dashboard({
 	let beeperEnabled = data.BeeperStatus ? "On" : "Off";
 	let position = [data.GPSCords.latitude, data.GPSCords.longitude];
 
-	const controlStatus = vehicleStatus === "Ready" && InitialGPS !== "N/A!" ? true : false
+	const controlStatus =
+		vehicleStatus === "Ready" && InitialGPS !== "N/A!" ? true : false;
 
 	let countdownNumber = 5;
 
@@ -259,7 +260,11 @@ function Dashboard({
 					oldData.Pressure = temp.Pressure;
 					oldData.Temperature = temp.Temperature;
 
-					if(temp.GPSLatitude !== false && temp.GPSLongitude !== false && InitialGPS === "N/A"){
+					if (
+						temp.GPSLatitude !== false &&
+						temp.GPSLongitude !== false &&
+						InitialGPS === "N/A"
+					) {
 						newStatus["GPS"] = ["ok", "GPS is connected"];
 						setInitialGPS(
 							temp.GPSLatitude + "," + temp.GPSLongitude
@@ -268,10 +273,6 @@ function Dashboard({
 							temp.GPSLatitude + "," + temp.GPSLongitude
 						);
 					}
-						
-					
-
-
 				}
 				if (WebSocketData.payload[0] === 9) {
 					if (vehicleStatus === "Launched") {
@@ -284,17 +285,17 @@ function Dashboard({
 						}
 					}
 				}
-				if(WebSocketData.payload[0] === 12){
+				if (WebSocketData.payload[0] === 12) {
 					newStatus["base_serial"] = WebSocketData.payload[1]
 						? ["ok", "Base serial is connected"]
 						: ["warning", "Base serial is not connected"];
-					}
+				}
 
-					if(WebSocketData.payload[0] === 13){
-						newStatus["base_lora"] = WebSocketData.payload[1]
-							? ["ok", "Base lora is connected"]
-							: ["warning", "Base lora is not connected"];
-						}
+				if (WebSocketData.payload[0] === 13) {
+					newStatus["base_lora"] = WebSocketData.payload[1]
+						? ["ok", "Base lora is connected"]
+						: ["warning", "Base lora is not connected"];
+				}
 
 				setComponent_status(newStatus);
 			}
@@ -355,7 +356,7 @@ function Dashboard({
 			<div className="pre-flight" id="pre-flight">
 				<div>
 					<div className="pre-title">
-						<h2 id="errorDisplay"></h2>
+						<h2 id="errorDisplay">Error</h2>
 						<button
 							onClick={() => {
 								document.querySelector(
@@ -421,13 +422,16 @@ function Dashboard({
 						</li>
 						<hr></hr>
 						<li>
-							<h3>Base Serail Connection</h3>
+							<h3>Base Serial Connection</h3>
 							<img
-								src={getStatusIcon(component_status.base_serial[0])}
+								src={getStatusIcon(
+									component_status.base_serial[0]
+								)}
 								onMouseEnter={() => {
 									document.getElementById(
 										"errorDisplay"
-									).innerHTML = component_status["base_serial"][1];
+									).innerHTML =
+										component_status["base_serial"][1];
 								}}
 								onMouseLeave={() => {
 									document.getElementById(
@@ -441,11 +445,14 @@ function Dashboard({
 						<li>
 							<h3>Base Lora Connection</h3>
 							<img
-								src={getStatusIcon(component_status.base_lora[0])}
+								src={getStatusIcon(
+									component_status.base_lora[0]
+								)}
 								onMouseEnter={() => {
 									document.getElementById(
 										"errorDisplay"
-									).innerHTML = component_status["base_lora"][1];
+									).innerHTML =
+										component_status["base_lora"][1];
 								}}
 								onMouseLeave={() => {
 									document.getElementById(
@@ -490,9 +497,7 @@ function Dashboard({
 			<section className="main-four">
 				<div className="parameter">
 					<Gauge value={voltage} maxValue={5} />
-					<p>
-						{voltage} V
-					</p>
+					<p>{voltage} V</p>
 				</div>
 				<div className="toolbar">
 					<div onClick={handleServoClick}>
@@ -546,13 +551,10 @@ function Dashboard({
 							/>
 						</div>
 						<div
-							onClick={
-								controlStatus ? handleInitGPS : null
-							}
+							onClick={controlStatus ? handleInitGPS : null}
 							style={{
 								opacity: controlStatus ? 1 : 0.2,
-								pointerEvents:
-								 controlStatus? "auto" : "none",
+								pointerEvents: controlStatus ? "auto" : "none",
 							}}>
 							<img src={homepointIcon} alt="Set homepoint" />
 						</div>
