@@ -85,7 +85,7 @@ function Dashboard({
 	component_status,
 }) {
 	const { data: WebSocketData, sendMessage } = useWebSocket(
-		"ws://localhost:8764"
+		"ws://localhost:8765"
 	);
 
 	const [InitialHeight, setInitialHeight] = useState("N/A");
@@ -96,7 +96,7 @@ function Dashboard({
 	let voltage = data.BatteryVoltage.toFixed(2);
 	let RelativeHeight = (PressureHeight - InitialHeight).toFixed(1);
 	let servoDeployed = data.ServoParachuteStatus ? "Deployed" : "Not deployed";
-	let beeperEnabled = data.BeeperStatus ? "On" : "Off";
+	let beeperEnabled = data.Beeper ? "On" : "Off";
 	let position = [data.GPSCords.latitude, data.GPSCords.longitude];
 
 	const controlStatus =
@@ -107,6 +107,7 @@ function Dashboard({
 	const [servoStatus, setServoStatus] = useState(servoDeployed);
 	const [beeperStatus, setBeeperStatus] = useState(beeperEnabled);
 	const [positionFromLaunchpad, setPositionFromLaunchpad] = useState("N/A");
+	const [beeperLoading, setBeeperLoading] = useState(false);
 
 	useEffect(() => {
 		const output = haversineDistance(
@@ -131,13 +132,27 @@ function Dashboard({
 	};
 
 	const handleBeeperClick = () => {
+		
 		setBeeperStatus(beeperStatus === "On" ? "Off" : "On");
+		setBeeperLoading(true);
 		if (beeperStatus === "On") {
 			sendMessage({ command: "beeper_off" });
 		} else {
 			sendMessage({ command: "beeper_on" });
 		}
-	};
+		}
+	
+		useEffect(() => {
+			
+			const temp = beeperStatus === "On";
+			const temp2 = data.Beeper === 1;
+			
+			if (temp2 === temp) {
+				console.log(temp, temp2);
+				setBeeperLoading(false);
+			}
+		}, [WebSocketData, beeperStatus, data.Beeper]);
+		
 
 	function ChangeView({ center }) {
 		const map = useMap();
@@ -201,7 +216,6 @@ function Dashboard({
 			}
 
 			if (WebSocketData.command === "component_status") {
-				console.log(WebSocketData.payload);
 				let newStatus = { ...component_status };
 				WebSocketData.payload[0] = parseInt(WebSocketData.payload[0]);
 				WebSocketData.payload[1] = Boolean(WebSocketData.payload[1]);
@@ -259,6 +273,10 @@ function Dashboard({
 					oldData.GPSCords.longitude = temp.GPSLongitude;
 					oldData.Pressure = temp.Pressure;
 					oldData.Temperature = temp.Temperature;
+					oldData.Beeper = temp.Beeper;
+					
+					
+					
 
 					if (
 						temp.GPSLatitude !== false &&
@@ -296,6 +314,11 @@ function Dashboard({
 						? ["ok", "Base lora is connected"]
 						: ["warning", "Base lora is not connected"];
 				}
+				if (WebSocketData.payload[0] === 14) {
+					newStatus["rocket_lora"] = WebSocketData.payload[1]
+						? ["ok", "Rocket lora is connected"]
+						: ["warning", "Rocket lora is not connected"];
+				}
 
 				setComponent_status(newStatus);
 			}
@@ -329,6 +352,20 @@ function Dashboard({
 		};
 		setInitialGPS(temp.GPSLatitude + "," + temp.GPSLongitude);
 		setInitialHeight(temp.currentAltitude.toFixed(0));
+		
+		if(data.PressureHeight){
+			let newStatus = { ...component_status };
+			newStatus["BMP"] = ["ok", "BMP is connected"];
+			setComponent_status(newStatus);
+		}
+		if(data.GPSCords.latitude && data.GPSCords.longitude){
+			let newStatus = { ...component_status };
+			newStatus["GPS"] = ["ok", "GPS is connected"];
+			setComponent_status(newStatus);
+
+
+		}
+		
 
 		sendMessage({
 			command: "set_homepoint",
@@ -368,24 +405,6 @@ function Dashboard({
 					</div>
 					<ul>
 						<li>
-							<h3>ESP</h3>
-							<img
-								src={getStatusIcon(component_status.ESP[0])}
-								onMouseEnter={() => {
-									document.getElementById(
-										"errorDisplay"
-									).innerHTML = component_status["ESP"][1];
-								}}
-								onMouseLeave={() => {
-									document.getElementById(
-										"errorDisplay"
-									).innerHTML = "";
-								}}
-								alt="ESP status"
-							/>
-						</li>
-						<hr></hr>
-						<li>
 							<h3>GPS module</h3>
 							<img
 								src={getStatusIcon(component_status.GPS[0])}
@@ -400,6 +419,24 @@ function Dashboard({
 									).innerHTML = "";
 								}}
 								alt="GPS status"
+							/>
+						</li>
+						<hr></hr>
+						<li>
+							<h3>Rocket LORA</h3>
+							<img
+								src={getStatusIcon(component_status["rocket_lora"][0])}
+								onMouseEnter={() => {
+									document.getElementById(
+										"errorDisplay"
+									).innerHTML = component_status["rocket_lora"][1];
+								}}
+								onMouseLeave={() => {
+									document.getElementById(
+										"errorDisplay"
+									).innerHTML = "";
+								}}
+								alt="rocket_lora status"
 							/>
 						</li>
 						<hr></hr>
@@ -506,7 +543,10 @@ function Dashboard({
 					</div>
 					<div onClick={handleBeeperClick}>
 						<h2>Beeper</h2>
-						<p>{beeperStatus}</p>
+						{!beeperLoading && <p>{beeperStatus}</p>}
+						
+						{beeperLoading && <p>Loading...</p>}
+
 					</div>
 					<selection
 						className="vodoravno"
@@ -551,13 +591,16 @@ function Dashboard({
 							/>
 						</div>
 						<div
-							onClick={controlStatus ? handleInitGPS : null}
-							style={{
-								opacity: controlStatus ? 1 : 0.2,
-								pointerEvents: controlStatus ? "auto" : "none",
-							}}>
-							<img src={homepointIcon} alt="Set homepoint" />
-						</div>
+		onClick={
+			controlStatus && InitialGPS !== "N/A" ? handleInitGPS : null
+		}
+		style={{
+			opacity: controlStatus && InitialGPS !== "N/A" ? 1 : 0.2,
+			pointerEvents: controlStatus && InitialGPS !== "N/A" ? "auto" : "none",
+			cursor: controlStatus && InitialGPS !== "N/A" ? "pointer" : "not-allowed",
+		}}>
+		<img src={homepointIcon} alt="Set homepoint" />
+	</div>
 					</selection>
 				</div>
 				<div className="vodoravno">

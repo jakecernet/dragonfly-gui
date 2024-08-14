@@ -49,6 +49,7 @@ function App() {
 		BeeperStatus: 0,
 		ServoParachuteStatus: 0,
 		Armed: 0,
+		Beeper:false,
 		InFlight: 0,
 		FlightTime: 0,
 		Uptime: 0,
@@ -71,7 +72,8 @@ function App() {
 		BMP: ["error", "UI waiting to get info"],
 		ESP: ["error", "UI waiting to get info"],
 		base_serial: ["error", "UI waiting to get info"],
-		base_lora: ["error", "UI waiting to get info"]
+		base_lora: ["error", "UI waiting to get info"],
+		rocket_lora: ["error", "UI waiting to get info"],
 	});
 
 	useEffect(() => {
