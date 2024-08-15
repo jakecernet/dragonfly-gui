@@ -3,8 +3,6 @@ function getRandomGpsCoordinates() {
 	const lat = 46.11775450274306;
 
 	const lon = 14.022392745016298;
-
-
 	
 	return {
 		latitude: lat,

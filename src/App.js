@@ -49,7 +49,7 @@ function App() {
 		BeeperStatus: 0,
 		ServoParachuteStatus: 0,
 		Armed: 0,
-		Beeper:false,
+		Beeper: false,
 		InFlight: 0,
 		FlightTime: 0,
 		Uptime: 0,
@@ -57,6 +57,7 @@ function App() {
 		PressureUnit: "Bar",
 		TimeUnit: "s",
 	});
+
 	const [flightNumber, setFlightNumber] = useState("");
 	const inputRef = useRef(null);
 	const [vehicleStatus, setVehicleStatus] = useState("Ready");

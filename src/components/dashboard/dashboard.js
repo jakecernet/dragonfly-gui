@@ -50,26 +50,6 @@ const getStatusIcon = (status) => {
 	}
 };
 
-const circleDisplay = ({ value, unit, maxRange, color }) => {
-	return (
-		<div className="circle">
-			<CircularProgressbar
-				value={value}
-				text={`${value} ${unit}`}
-				maxValue={maxRange}
-				styles={buildStyles({
-					textColor: "#fff",
-					pathColor: color || "rgb(43, 82, 189)",
-					trailColor: "#fff",
-					pathTransitionDuration: 0.5,
-					textSize: "14px",
-					rotation: 0.6,
-				})}
-			/>
-		</div>
-	);
-};
-
 function Dashboard({
 	data,
 	setData,
@@ -98,6 +78,8 @@ function Dashboard({
 	let servoDeployed = data.ServoParachuteStatus ? "Deployed" : "Not deployed";
 	let beeperEnabled = data.Beeper ? "On" : "Off";
 	let position = [data.GPSCords.latitude, data.GPSCords.longitude];
+
+	let signalStrength = 1.5;
 
 	const controlStatus =
 		vehicleStatus === "Ready" && InitialGPS !== "N/A!" ? true : false;
@@ -132,7 +114,6 @@ function Dashboard({
 	};
 
 	const handleBeeperClick = () => {
-		
 		setBeeperStatus(beeperStatus === "On" ? "Off" : "On");
 		setBeeperLoading(true);
 		if (beeperStatus === "On") {
@@ -140,19 +121,17 @@ function Dashboard({
 		} else {
 			sendMessage({ command: "beeper_on" });
 		}
+	};
+
+	useEffect(() => {
+		const temp = beeperStatus === "On";
+		const temp2 = data.Beeper === 1;
+
+		if (temp2 === temp) {
+			console.log(temp, temp2);
+			setBeeperLoading(false);
 		}
-	
-		useEffect(() => {
-			
-			const temp = beeperStatus === "On";
-			const temp2 = data.Beeper === 1;
-			
-			if (temp2 === temp) {
-				console.log(temp, temp2);
-				setBeeperLoading(false);
-			}
-		}, [WebSocketData, beeperStatus, data.Beeper]);
-		
+	}, [WebSocketData, beeperStatus, data.Beeper]);
 
 	function ChangeView({ center }) {
 		const map = useMap();
@@ -274,9 +253,6 @@ function Dashboard({
 					oldData.Pressure = temp.Pressure;
 					oldData.Temperature = temp.Temperature;
 					oldData.Beeper = temp.Beeper;
-					
-					
-					
 
 					if (
 						temp.GPSLatitude !== false &&
@@ -352,20 +328,17 @@ function Dashboard({
 		};
 		setInitialGPS(temp.GPSLatitude + "," + temp.GPSLongitude);
 		setInitialHeight(temp.currentAltitude.toFixed(0));
-		
-		if(data.PressureHeight){
+
+		if (data.PressureHeight) {
 			let newStatus = { ...component_status };
 			newStatus["BMP"] = ["ok", "BMP is connected"];
 			setComponent_status(newStatus);
 		}
-		if(data.GPSCords.latitude && data.GPSCords.longitude){
+		if (data.GPSCords.latitude && data.GPSCords.longitude) {
 			let newStatus = { ...component_status };
 			newStatus["GPS"] = ["ok", "GPS is connected"];
 			setComponent_status(newStatus);
-
-
 		}
-		
 
 		sendMessage({
 			command: "set_homepoint",
@@ -386,6 +359,24 @@ function Dashboard({
 
 	const openPreFlightCheck = () => {
 		document.querySelector(".pre-flight").style.display = "flex";
+	};
+
+	const barColor = signalStrength >= 2 ? "#00ff00" : "yellow";
+
+	const barOne = {
+		stroke: signalStrength >= 4 ? barColor : "#ffffff44",
+	};
+
+	const barTwo = {
+		stroke: signalStrength >= 3 ? barColor : "#ffffff44",
+	};
+
+	const barThree = {
+		stroke: signalStrength >= 2 ? barColor : "#ffffff44",
+	};
+
+	const barFour = {
+		stroke: signalStrength >= 1 ? barColor : "#ffffff44",
 	};
 
 	return (
@@ -425,11 +416,14 @@ function Dashboard({
 						<li>
 							<h3>Rocket LORA</h3>
 							<img
-								src={getStatusIcon(component_status["rocket_lora"][0])}
+								src={getStatusIcon(
+									component_status["rocket_lora"][0]
+								)}
 								onMouseEnter={() => {
 									document.getElementById(
 										"errorDisplay"
-									).innerHTML = component_status["rocket_lora"][1];
+									).innerHTML =
+										component_status["rocket_lora"][1];
 								}}
 								onMouseLeave={() => {
 									document.getElementById(
@@ -530,6 +524,29 @@ function Dashboard({
 						<p>{positionFromLaunchpad} m</p>
 					</div>
 				</div>
+				<div className="heights">
+					<div>
+						<h2>Signal strength</h2>
+						<div className="signal">
+							<svg viewBox="0 0 90 90" style={barOne}>
+								<line x1="50" y1="0" x2="50" y2="100" />
+							</svg>
+							<svg viewBox="0 0 90 90" style={barTwo}>
+								<line x1="50" y1="0" x2="50" y2="75" />
+							</svg>
+							<svg viewBox="0 0 90 90" style={barThree}>
+								<line x1="50" y1="0" x2="50" y2="50" />
+							</svg>
+							<svg viewBox="0 0 90 90" style={barFour}>
+								<line x1="50" y1="0" x2="50" y2="25" />
+							</svg>
+						</div>
+					</div>
+					<div>
+						<h2>Signal noise</h2>
+						<p>0.5</p>
+					</div>
+				</div>
 			</section>
 			<section className="main-four">
 				<div className="parameter">
@@ -544,9 +561,8 @@ function Dashboard({
 					<div onClick={handleBeeperClick}>
 						<h2>Beeper</h2>
 						{!beeperLoading && <p>{beeperStatus}</p>}
-						
-						{beeperLoading && <p>Loading...</p>}
 
+						{beeperLoading && <p>Loading...</p>}
 					</div>
 					<selection
 						className="vodoravno"
@@ -591,16 +607,27 @@ function Dashboard({
 							/>
 						</div>
 						<div
-		onClick={
-			controlStatus && InitialGPS !== "N/A" ? handleInitGPS : null
-		}
-		style={{
-			opacity: controlStatus && InitialGPS !== "N/A" ? 1 : 0.2,
-			pointerEvents: controlStatus && InitialGPS !== "N/A" ? "auto" : "none",
-			cursor: controlStatus && InitialGPS !== "N/A" ? "pointer" : "not-allowed",
-		}}>
-		<img src={homepointIcon} alt="Set homepoint" />
-	</div>
+							onClick={
+								controlStatus && InitialGPS !== "N/A"
+									? handleInitGPS
+									: null
+							}
+							style={{
+								opacity:
+									controlStatus && InitialGPS !== "N/A"
+										? 1
+										: 0.2,
+								pointerEvents:
+									controlStatus && InitialGPS !== "N/A"
+										? "auto"
+										: "none",
+								cursor:
+									controlStatus && InitialGPS !== "N/A"
+										? "pointer"
+										: "not-allowed",
+							}}>
+							<img src={homepointIcon} alt="Set homepoint" />
+						</div>
 					</selection>
 				</div>
 				<div className="vodoravno">
