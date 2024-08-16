@@ -125,6 +125,12 @@ function App() {
 			document.body.classList.toggle("armed", true);
 			document.body.classList.toggle("ready", false);
 			document.title = `Flight ${flightNumber} - ${vehicleStatus}`;
+
+			if (vehicleStatus === "Landed") {
+				document.body.classList.toggle("armed", false);
+				document.body.classList.toggle("ready", true);
+				document.title = `Flight ${flightNumber} - Landed`;
+			}
 		}
 	}, [vehicleStatus, flightNumber]);
 
